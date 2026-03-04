@@ -1,0 +1,58 @@
+package ru.practicum.service;
+
+import org.springframework.stereotype.Service;
+import ru.practicum.domain.Post;
+import ru.practicum.dto.PostDto;
+import ru.practicum.dto.PostsPageDto;
+import ru.practicum.mapper.PostMapper;
+import ru.practicum.repository.PostRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class PostServiceImpl implements PostService {
+
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
+
+    public PostServiceImpl(PostRepository postRepository, PostMapper postMapper) {
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
+    }
+
+    @Override
+    public PostsPageDto getPosts(String search, int pageNumber, int pageSize) {
+        List<String> tags = new ArrayList<>();
+        List<String> titleWords = new ArrayList<>();
+
+        if (search != null && !search.isBlank()) {
+            for (String word : search.trim().split("\\s+")) {
+                if (word.startsWith("#")) {
+                    String tag = word.substring(1);
+                    if (!tag.isEmpty()) {
+                        tags.add(tag);
+                    }
+                } else {
+                    titleWords.add(word);
+                }
+            }
+        }
+
+        String titleSearch = String.join(" ", titleWords);
+        int offset = (pageNumber - 1) * pageSize;
+
+        List<Post> posts = postRepository.findAll(titleSearch, tags, offset, pageSize);
+        int total = postRepository.count(titleSearch, tags);
+
+        int lastPage = Math.max(1, (int) Math.ceil((double) total / pageSize));
+        boolean hasPrev = pageNumber > 1;
+        boolean hasNext = pageNumber < lastPage;
+
+        List<PostDto> postDtos = posts.stream()
+                .map(postMapper::toListDto)
+                .toList();
+
+        return new PostsPageDto(postDtos, hasPrev, hasNext, lastPage);
+    }
+}
