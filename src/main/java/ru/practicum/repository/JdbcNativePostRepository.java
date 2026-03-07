@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JdbcNativeUserRepository implements PostRepository {
+public class JdbcNativePostRepository implements PostRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcNativeUserRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -25,7 +25,6 @@ public class JdbcNativeUserRepository implements PostRepository {
             rs.getLong("id"),
             rs.getString("title"),
             rs.getString("text"),
-            null,
             null,
             rs.getInt("likes_count"),
             parseTags(rs.getString("tags")),
@@ -74,9 +73,10 @@ public class JdbcNativeUserRepository implements PostRepository {
 
     @Override
     public Optional<PostImage> findImageById(long id) {
-        String sql = "SELECT image, image_content_type FROM posts WHERE id = ?";
-        PostImage result = jdbcTemplate.queryForObject(sql,
-                (rs, rowNum) -> new PostImage(rs.getBytes("image"), rs.getString("image_content_type")),
+        PostImage result = jdbcTemplate.query("SELECT image, image_content_type FROM posts WHERE id = ?",
+                resultSet -> resultSet.next() ?
+                        new PostImage(resultSet.getBytes("image"), resultSet.getString("image_content_type")) :
+                        null,
                 id);
         return Optional.ofNullable(result);
     }
@@ -85,6 +85,6 @@ public class JdbcNativeUserRepository implements PostRepository {
         if (tagsStr == null || tagsStr.isBlank()) {
             return Collections.emptyList();
         }
-        return Arrays.asList(tagsStr.trim().split("\\s+"));
+        return Arrays.stream(tagsStr.trim().split("\\s+")).toList();
     }
 }

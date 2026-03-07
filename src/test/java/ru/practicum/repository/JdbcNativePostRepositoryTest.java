@@ -15,7 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcNativeUserRepository.class})
+@SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcNativePostRepository.class})
 @TestPropertySource(locations = "classpath:test-application.properties")
 class JdbcNativePostRepositoryTest {
 
@@ -135,8 +135,7 @@ class JdbcNativePostRepositoryTest {
         assertEquals("Hibernate text", post.getText());
         assertEquals(1, post.getLikesCount());
         assertThat(post.getTags(), contains("java", "orm", "hibernate"));
-        assertNull(post.getImage());
-        assertNull(post.getImageContentType());
+        assertNull(post.getPostImage());
         assertEquals(2, post.getCommentsCount());
     }
 

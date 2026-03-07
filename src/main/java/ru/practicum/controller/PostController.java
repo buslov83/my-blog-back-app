@@ -28,11 +28,11 @@ public class PostController {
     }
 
     @GetMapping("/{id}/image")
-    public ResponseEntity<byte[]> getPostImage(@PathVariable long id) {
+    public ResponseEntity<byte[]> getPostImage(@PathVariable("id") long id) {
         return postService.getPostImage(id)
                 .map(img -> ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(img.getContentType()))
-                        .body(img.getData()))
+                        .contentType(MediaType.parseMediaType(img.contentType()))
+                        .body(img.data()))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

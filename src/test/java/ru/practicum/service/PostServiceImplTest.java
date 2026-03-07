@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.domain.Post;
+import ru.practicum.domain.PostImage;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.mapper.PostMapper;
@@ -14,6 +15,7 @@ import ru.practicum.repository.PostRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,8 +39,8 @@ class PostServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        post1 = new Post(1L, "Spring Boot Guide", "Content of post 1", null, null, 5, List.of("spring", "java"), 3);
-        post2 = new Post(2L, "Java Tips", "Content of post 2", null, null, 2, List.of("java"), 1);
+        post1 = new Post(1L, "Spring Boot Guide", "Content of post 1", null, 5, List.of("spring", "java"), 3);
+        post2 = new Post(2L, "Java Tips", "Content of post 2", null, 2, List.of("java"), 1);
         postDto1 = new PostDto(1L, "Spring Boot Guide", "Content of post 1", List.of("spring", "java"), 5, 3);
         postDto2 = new PostDto(2L, "Java Tips", "Content of post 2", List.of("java"), 2, 1);
     }
@@ -238,5 +240,44 @@ class PostServiceImplTest {
         PostsPageDto result = postService.getPosts(null, 4, 5);
 
         assertEquals(2, result.lastPage());
+    }
+
+    @Test
+    void getPostImage_imageExists() {
+        byte[] data = {1, 2, 3};
+        when(postRepository.findImageById(1L)).thenReturn(Optional.of(new PostImage(data, "image/jpeg")));
+
+        Optional<PostImage> result = postService.getPostImage(1L);
+
+        assertTrue(result.isPresent());
+        assertArrayEquals(data, result.get().data());
+        assertEquals("image/jpeg", result.get().contentType());
+    }
+
+    @Test
+    void getPostImage_postNotFound_returnsEmpty() {
+        when(postRepository.findImageById(99L)).thenReturn(Optional.empty());
+
+        Optional<PostImage> result = postService.getPostImage(99L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getPostImage_imageDataIsNull_returnsEmpty() {
+        when(postRepository.findImageById(1L)).thenReturn(Optional.of(new PostImage(null, null)));
+
+        Optional<PostImage> result = postService.getPostImage(1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getPostImage_imageDataIsEmpty_returnsEmpty() {
+        when(postRepository.findImageById(1L)).thenReturn(Optional.of(new PostImage(new byte[0], "image/png")));
+
+        Optional<PostImage> result = postService.getPostImage(1L);
+
+        assertTrue(result.isEmpty());
     }
 }

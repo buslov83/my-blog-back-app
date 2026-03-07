@@ -7,8 +7,7 @@ public class Post {
     private final Long id;
     private final String title;
     private final String text;
-    private final byte[] image;
-    private final String imageContentType;
+    private final PostImage postImage;
     private final int likesCount;
     private final List<String> tags;
     private final int commentsCount;
@@ -16,16 +15,14 @@ public class Post {
     public Post(Long id,
                 String title,
                 String text,
-                byte[] image,
-                String imageContentType,
+                PostImage postImage,
                 int likesCount,
                 List<String> tags,
                 int commentsCount) {
         this.id = id;
         this.title = title;
         this.text = text;
-        this.image = image;
-        this.imageContentType = imageContentType;
+        this.postImage = postImage;
         this.likesCount = likesCount;
         this.tags = tags;
         this.commentsCount = commentsCount;
@@ -43,12 +40,8 @@ public class Post {
         return text;
     }
 
-    public byte[] getImage() {
-        return image;
-    }
-
-    public String getImageContentType() {
-        return imageContentType;
+    public PostImage getPostImage() {
+        return postImage;
     }
 
     public int getLikesCount() {

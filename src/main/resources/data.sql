@@ -15,7 +15,7 @@ VALUES (
     NULL,
     NULL,
     1,
-    ' hibernate java orm '
+    ' java orm hibernate '
 );
 
 INSERT INTO posts (title, text, image, image_content_type, likes_count, tags)
@@ -25,7 +25,7 @@ VALUES (
     NULL,
     NULL,
     7,
-    ' design java oop patterns '
+    ' java design oop patterns '
 );
 
 INSERT INTO comments (text, post_id) VALUES ('Отличная статья, очень доступно объяснено!', 1);
