@@ -2,6 +2,7 @@ package ru.practicum.service;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.domain.Post;
+import ru.practicum.domain.PostImage;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.mapper.PostMapper;
@@ -9,6 +10,7 @@ import ru.practicum.repository.PostRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -54,5 +56,11 @@ public class PostServiceImpl implements PostService {
                 .toList();
 
         return new PostsPageDto(postDtos, hasPrev, hasNext, lastPage);
+    }
+
+    @Override
+    public Optional<PostImage> getPostImage(long id) {
+        return postRepository.findImageById(id)
+                .filter(img -> img.getData() != null);
     }
 }

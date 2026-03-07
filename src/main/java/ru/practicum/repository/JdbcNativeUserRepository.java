@@ -4,11 +4,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.practicum.domain.Post;
+import ru.practicum.domain.PostImage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JdbcNativeUserRepository implements PostRepository {
@@ -68,6 +70,15 @@ public class JdbcNativeUserRepository implements PostRepository {
             sql.append(" AND p.tags LIKE ?");
             params.add("% " + tag + " %");
         }
+    }
+
+    @Override
+    public Optional<PostImage> findImageById(long id) {
+        String sql = "SELECT image, image_content_type FROM posts WHERE id = ?";
+        PostImage result = jdbcTemplate.queryForObject(sql,
+                (rs, rowNum) -> new PostImage(rs.getBytes("image"), rs.getString("image_content_type")),
+                id);
+        return Optional.ofNullable(result);
     }
 
     private static List<String> parseTags(String tagsStr) {
