@@ -25,7 +25,6 @@ public class JdbcNativePostRepository implements PostRepository {
             rs.getLong("id"),
             rs.getString("title"),
             rs.getString("text"),
-            null,
             rs.getInt("likes_count"),
             parseTags(rs.getString("tags")),
             rs.getInt("comments_count")

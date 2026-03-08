@@ -39,8 +39,8 @@ class PostServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        post1 = new Post(1L, "Spring Boot Guide", "Content of post 1", null, 5, List.of("spring", "java"), 3);
-        post2 = new Post(2L, "Java Tips", "Content of post 2", null, 2, List.of("java"), 1);
+        post1 = new Post(1L, "Spring Boot Guide", "Content of post 1", 5, List.of("spring", "java"), 3);
+        post2 = new Post(2L, "Java Tips", "Content of post 2", 2, List.of("java"), 1);
         postDto1 = new PostDto(1L, "Spring Boot Guide", "Content of post 1", List.of("spring", "java"), 5, 3);
         postDto2 = new PostDto(2L, "Java Tips", "Content of post 2", List.of("java"), 2, 1);
     }
