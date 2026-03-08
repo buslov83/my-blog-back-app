@@ -12,5 +12,7 @@ public interface PostRepository {
 
     int count(String titleSearch, List<String> tags);
 
+    Optional<Post> findById(long id);
+
     Optional<PostImage> findImageById(long id);
 }

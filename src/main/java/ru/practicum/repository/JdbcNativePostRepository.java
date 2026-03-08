@@ -72,6 +72,20 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public Optional<Post> findById(long id) {
+        Post result = jdbcTemplate.query(
+                "SELECT p.id, p.title, p.text, p.likes_count, p.tags," +
+                "       COUNT(c.id) AS comments_count" +
+                " FROM posts p" +
+                " LEFT JOIN comments c ON c.post_id = p.id" +
+                " WHERE p.id = ?" +
+                " GROUP BY p.id, p.title, p.text, p.likes_count, p.tags",
+                resultSet -> resultSet.next() ? POST_ROW_MAPPER.mapRow(resultSet, 0) : null,
+                id);
+        return Optional.ofNullable(result);
+    }
+
+    @Override
     public Optional<PostImage> findImageById(long id) {
         PostImage result = jdbcTemplate.query("SELECT image, image_content_type FROM posts WHERE id = ?",
                 resultSet -> resultSet.next() ?

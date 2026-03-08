@@ -59,6 +59,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Optional<PostDto> getPost(long id) {
+        return postRepository.findById(id).map(postMapper::toFullDto);
+    }
+
+    @Override
     public Optional<PostImage> getPostImage(long id) {
         return postRepository.findImageById(id)
                 .filter(img -> img.data() != null && img.data().length > 0);

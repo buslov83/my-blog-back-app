@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.service.PostService;
 
@@ -25,6 +26,13 @@ public class PostController {
                                  @RequestParam("pageNumber") int pageNumber,
                                  @RequestParam("pageSize") int pageSize) {
         return postService.getPosts(search, pageNumber, pageSize);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostDto> getPost(@PathVariable("id") long id) {
+        return postService.getPost(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/image")
