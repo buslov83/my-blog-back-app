@@ -2,12 +2,17 @@ package ru.practicum.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.domain.Post;
+import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 
 @Component
 public class PostMapper {
 
     private static final int MAX_PREVIEW_LENGTH = 128;
+
+    public Post fromCreateDto(CreatePostDto dto) {
+        return new Post(null, dto.title(), dto.text(), 0, dto.tags(), 0);
+    }
 
     public PostDto toListDto(Post post) {
         String text = post.getText();

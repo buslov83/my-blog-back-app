@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.domain.Post;
 import ru.practicum.domain.PostImage;
+import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.mapper.PostMapper;
@@ -279,5 +280,19 @@ class PostServiceImplTest {
         Optional<PostImage> result = postService.getPostImage(1L);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void createPost_savesPostAndReturnsFullDto() {
+        CreatePostDto dto = new CreatePostDto("Title", "Text", List.of("java"));
+        Post post = new Post(null, "Title", "Text", 0, List.of("java"), 0);
+        when(postMapper.fromCreateDto(dto)).thenReturn(post);
+        PostDto expected = new PostDto(1L, "Title", "Text", List.of("java"), 0, 0);
+        when(postMapper.toFullDto(post)).thenReturn(expected);
+
+        PostDto result = postService.createPost(dto);
+
+        verify(postRepository).create(post);
+        assertEquals(expected, result);
     }
 }

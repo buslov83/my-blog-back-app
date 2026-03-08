@@ -3,6 +3,7 @@ package ru.practicum.service;
 import org.springframework.stereotype.Service;
 import ru.practicum.domain.Post;
 import ru.practicum.domain.PostImage;
+import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.mapper.PostMapper;
@@ -61,6 +62,13 @@ public class PostServiceImpl implements PostService {
     @Override
     public Optional<PostDto> getPost(long id) {
         return postRepository.findById(id).map(postMapper::toFullDto);
+    }
+
+    @Override
+    public PostDto createPost(CreatePostDto dto) {
+        Post post = postMapper.fromCreateDto(dto);
+        postRepository.create(post);
+        return postMapper.toFullDto(post);
     }
 
     @Override

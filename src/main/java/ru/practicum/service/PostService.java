@@ -1,6 +1,7 @@
 package ru.practicum.service;
 
 import ru.practicum.domain.PostImage;
+import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 
@@ -13,4 +14,6 @@ public interface PostService {
     Optional<PostDto> getPost(long id);
 
     Optional<PostImage> getPostImage(long id);
+
+    PostDto createPost(CreatePostDto dto);
 }
