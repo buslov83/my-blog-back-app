@@ -2,15 +2,15 @@ package ru.practicum.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.practicum.domain.Post;
 import ru.practicum.domain.PostImage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.*;
 
 @Repository
 public class JdbcNativePostRepository implements PostRepository {
@@ -87,11 +87,29 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public Optional<PostImage> findImageById(long id) {
         PostImage result = jdbcTemplate.query("SELECT image, image_content_type FROM posts WHERE id = ?",
-                resultSet -> resultSet.next() ?
-                        new PostImage(resultSet.getBytes("image"), resultSet.getString("image_content_type")) :
-                        null,
+                resultSet -> resultSet.next()
+                        ? new PostImage(resultSet.getBytes("image"), resultSet.getString("image_content_type"))
+                        : null,
                 id);
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public void create(Post post) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        String tagsStr = post.getTags() == null || post.getTags().isEmpty()
+                ? null
+                : " " + String.join(" ", post.getTags()) + " ";
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO posts (title, text, tags, likes_count) VALUES (?, ?, ?, 0)",
+                    Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getText());
+            ps.setString(3, tagsStr);
+            return ps;
+        }, keyHolder);
+        post.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
     }
 
     private static List<String> parseTags(String tagsStr) {

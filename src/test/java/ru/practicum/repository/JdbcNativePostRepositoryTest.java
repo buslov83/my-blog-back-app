@@ -10,6 +10,7 @@ import ru.practicum.configuration.DataSourceConfiguration;
 import ru.practicum.domain.Post;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -28,6 +29,8 @@ class JdbcNativePostRepositoryTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.execute("DELETE FROM posts"); // cascades to comments
+        // Reset identity sequence so DB generated IDs don't overlap with the explicit IDs below
+        jdbcTemplate.execute("ALTER TABLE posts ALTER COLUMN id RESTART WITH 50");
 
         jdbcTemplate.update(
                 "INSERT INTO posts (id, title, text, likes_count, tags) VALUES (?,?,?,?,?)",
@@ -149,9 +152,96 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void findAll_nullTags_mappedToEmptyList() {
+    void findAll_returnedNullTags_mappedToEmptyList() {
         List<Post> posts = postRepository.findAll("springify", List.of(), 0, 10);
         assertEquals(1, posts.size());
         assertTrue(posts.getFirst().getTags().isEmpty());
+    }
+
+    @Test
+    void findById_existingId_returnsNonEmptyOptional() {
+        assertTrue(postRepository.findById(1L).isPresent());
+    }
+
+    @Test
+    void findById_nonExistentId_returnsEmpty() {
+        assertTrue(postRepository.findById(999L).isEmpty());
+    }
+
+    @Test
+    void findById_allFieldsMappedCorrectly() {
+        Post post = postRepository.findById(2L).orElseThrow();
+
+        assertEquals(2L, post.getId());
+        assertEquals("Hibernate ORM Tutorial", post.getTitle());
+        assertEquals("Hibernate text", post.getText());
+        assertEquals(1, post.getLikesCount());
+        assertThat(post.getTags(), contains("java", "orm", "hibernate"));
+        assertEquals(2, post.getCommentsCount());
+        assertNull(post.getPostImage());
+    }
+
+    @Test
+    void findById_postWithNullTags_returnsEmptyTagList() {
+        Post post = postRepository.findById(4L).orElseThrow();
+
+        assertTrue(post.getTags().isEmpty());
+    }
+
+    @Test
+    void findById_commentsCount() {
+        assertEquals(0, postRepository.findById(1L).orElseThrow().getCommentsCount());
+        assertEquals(2, postRepository.findById(2L).orElseThrow().getCommentsCount());
+    }
+
+    @Test
+    void create_withTags_persistsPostAndSetsId() {
+        Post post = new Post(null, "New Post", "New text", 0, List.of("foo", "bar"), 0);
+
+        postRepository.create(post);
+
+        assertNotNull(post.getId());
+        Optional<Post> saved = postRepository.findById(post.getId());
+        assertTrue(saved.isPresent());
+        Post found = saved.get();
+        assertEquals("New Post", found.getTitle());
+        assertEquals("New text", found.getText());
+        assertEquals(0, found.getLikesCount());
+        assertThat(found.getTags(), contains("foo", "bar"));
+        assertEquals(0, found.getCommentsCount());
+    }
+
+    @Test
+    void create_withEmptyTags_persistsPostWithNoTags() {
+        Post post = new Post(null, "No Tags Post", "Some text", 0, List.of(), 0);
+
+        postRepository.create(post);
+
+        assertNotNull(post.getId());
+        Optional<Post> saved = postRepository.findById(post.getId());
+        assertTrue(saved.isPresent());
+        assertTrue(saved.get().getTags().isEmpty());
+    }
+
+    @Test
+    void create_withNullTags_persistsPostWithNoTags() {
+        Post post = new Post(null, "Null Tags Post", "Some text", 0, null, 0);
+
+        postRepository.create(post);
+
+        assertNotNull(post.getId());
+        Optional<Post> saved = postRepository.findById(post.getId());
+        assertTrue(saved.isPresent());
+        assertTrue(saved.get().getTags().isEmpty());
+    }
+
+    @Test
+    void create_tagsStoredWithSpacePaddingAllowTagFiltering() {
+        Post post = new Post(null, "Tag Filter Test", "text", 0, List.of("unique"), 0);
+        postRepository.create(post);
+
+        List<Post> found = postRepository.findAll("", List.of("unique"), 0, 10);
+        assertEquals(1, found.size());
+        assertEquals("Tag Filter Test", found.getFirst().getTitle());
     }
 }

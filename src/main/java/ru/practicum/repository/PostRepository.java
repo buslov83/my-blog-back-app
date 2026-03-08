@@ -15,4 +15,6 @@ public interface PostRepository {
     Optional<Post> findById(long id);
 
     Optional<PostImage> findImageById(long id);
+
+    void create(Post post);
 }
