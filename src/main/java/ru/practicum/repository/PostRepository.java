@@ -17,4 +17,6 @@ public interface PostRepository {
     Optional<PostImage> findImageById(long id);
 
     void create(Post post);
+
+    boolean updateImage(long id, byte[] data, String contentType);
 }

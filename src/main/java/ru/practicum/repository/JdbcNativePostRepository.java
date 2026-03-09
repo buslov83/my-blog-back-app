@@ -85,16 +85,6 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public Optional<PostImage> findImageById(long id) {
-        PostImage result = jdbcTemplate.query("SELECT image, image_content_type FROM posts WHERE id = ?",
-                resultSet -> resultSet.next()
-                        ? new PostImage(resultSet.getBytes("image"), resultSet.getString("image_content_type"))
-                        : null,
-                id);
-        return Optional.ofNullable(result);
-    }
-
-    @Override
     public void create(Post post) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String tagsStr = post.getTags() == null || post.getTags().isEmpty()
@@ -110,6 +100,23 @@ public class JdbcNativePostRepository implements PostRepository {
             return ps;
         }, keyHolder);
         post.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+    }
+
+    @Override
+    public Optional<PostImage> findImageById(long id) {
+        PostImage result = jdbcTemplate.query("SELECT image, image_content_type FROM posts WHERE id = ?",
+                resultSet -> resultSet.next()
+                        ? new PostImage(resultSet.getBytes("image"), resultSet.getString("image_content_type"))
+                        : null,
+                id);
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public boolean updateImage(long id, byte[] data, String contentType) {
+        int updated = jdbcTemplate.update("UPDATE posts SET image = ?, image_content_type = ? WHERE id = ?",
+                data, contentType, id);
+        return updated > 0;
     }
 
     private static List<String> parseTags(String tagsStr) {

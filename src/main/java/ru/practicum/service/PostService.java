@@ -13,7 +13,9 @@ public interface PostService {
 
     Optional<PostDto> getPost(long id);
 
+    PostDto createPost(CreatePostDto dto);
+
     Optional<PostImage> getPostImage(long id);
 
-    PostDto createPost(CreatePostDto dto);
+    boolean updatePostImage(long id, byte[] data, String contentType);
 }

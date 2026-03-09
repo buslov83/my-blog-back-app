@@ -12,6 +12,8 @@ import ru.practicum.domain.Post;
 import java.util.List;
 import java.util.Optional;
 
+import ru.practicum.domain.PostImage;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -243,5 +245,34 @@ class JdbcNativePostRepositoryTest {
         List<Post> found = postRepository.findAll("", List.of("unique"), 0, 10);
         assertEquals(1, found.size());
         assertEquals("Tag Filter Test", found.getFirst().getTitle());
+    }
+
+    @Test
+    void findImageById_nonExistentPost_returnsEmptyOptional() {
+        assertTrue(postRepository.findImageById(999L).isEmpty());
+    }
+
+    @Test
+    void findImageById_existingPostWithNoImage_returnsOptionalWithNullData() {
+        PostImage postImage = postRepository.findImageById(1L).orElseThrow();
+        assertNull(postImage.data());
+        assertNull(postImage.contentType());
+    }
+
+    @Test
+    void updateImage_existingPost_updatesImageDataAndContentType() {
+        byte[] imageData = new byte[]{10, 20, 30, 40};
+        String contentType = "image/jpeg";
+
+        assertTrue(postRepository.updateImage(1L, imageData, contentType));
+
+        PostImage postImage = postRepository.findImageById(1L).orElseThrow();
+        assertArrayEquals(imageData, postImage.data());
+        assertEquals(contentType, postImage.contentType());
+    }
+
+    @Test
+    void updateImage_nonExistentPost_returnsFalse() {
+        assertFalse(postRepository.updateImage(999L, new byte[]{1, 2, 3}, "image/png"));
     }
 }

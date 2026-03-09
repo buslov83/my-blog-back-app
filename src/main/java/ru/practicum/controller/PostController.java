@@ -4,10 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.service.PostService;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -37,6 +40,20 @@ public class PostController {
         return postService.getPost(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updatePostImage(@PathVariable("id") long id,
+                                                @RequestPart("image") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Empty file");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null) {
+            return ResponseEntity.badRequest().body("Content type is missing");
+        }
+        boolean updated = postService.updatePostImage(id, file.getBytes(), contentType);
+        return updated ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/image")

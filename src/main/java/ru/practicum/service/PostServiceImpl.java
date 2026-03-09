@@ -75,4 +75,9 @@ public class PostServiceImpl implements PostService {
     public Optional<PostImage> getPostImage(long id) {
         return postRepository.findImageById(id).filter(img -> img.data() != null && img.data().length > 0);
     }
+
+    @Override
+    public boolean updatePostImage(long id, byte[] data, String contentType) {
+        return postRepository.updateImage(id, data, contentType);
+    }
 }
