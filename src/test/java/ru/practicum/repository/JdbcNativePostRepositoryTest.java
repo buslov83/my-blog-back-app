@@ -197,6 +197,16 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
+    void existsById_existingId() {
+        assertTrue(postRepository.existsById(1L));
+    }
+
+    @Test
+    void existsById_nonExistentId() {
+        assertFalse(postRepository.existsById(999L));
+    }
+
+    @Test
     void create_withTags_persistsPostAndSetsId() {
         Post post = new Post(null, "New Post", "New text", 0, List.of("foo", "bar"), 0);
 

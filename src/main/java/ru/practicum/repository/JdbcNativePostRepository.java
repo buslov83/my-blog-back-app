@@ -85,6 +85,12 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public boolean existsById(long id) {
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posts WHERE id = ?", Integer.class, id);
+        return count != null && count > 0;
+    }
+
+    @Override
     public void create(Post post) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String tagsStr = post.getTags() == null || post.getTags().isEmpty()

@@ -14,9 +14,11 @@ public interface PostRepository {
 
     Optional<Post> findById(long id);
 
-    Optional<PostImage> findImageById(long id);
+    boolean existsById(long id);
 
     void create(Post post);
+
+    Optional<PostImage> findImageById(long id);
 
     boolean updateImage(long id, byte[] data, String contentType);
 }
