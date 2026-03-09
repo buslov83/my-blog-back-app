@@ -5,21 +5,26 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
+import ru.practicum.service.CommentService;
 import ru.practicum.service.PostService;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, CommentService commentService) {
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     @PostMapping
@@ -63,5 +68,10 @@ public class PostController {
                         .contentType(MediaType.parseMediaType(img.contentType()))
                         .body(img.data()))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/comments")
+    public List<CommentDto> getComments(@PathVariable("id") long id) {
+        return commentService.getCommentsByPostId(id);
     }
 }
