@@ -95,14 +95,14 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void findAll_byTwoWordTitleSearch_returnsMatchingPosts() {
+    void findAll_byMultiWordTitleSearch_returnsMatchingPosts() {
         List<Post> posts = postRepository.findAll("spring mvc", List.of(), 0, 10);
         assertEquals(1, posts.size());
         assertEquals("Spring MVC Guide", posts.getFirst().getTitle());
     }
 
     @Test
-    void count_byTwoWordTitleSearch_returnsMatchingCount() {
+    void count_byMultiWordTitleSearch_returnsMatchingCount() {
         assertEquals(1, postRepository.count("spring mvc", List.of()));
     }
 
@@ -128,6 +128,18 @@ class JdbcNativePostRepositoryTest {
     @Test
     void count_byMultipleTags_andLogic() {
         assertEquals(1, postRepository.count("", List.of("hibernate", "java")));
+    }
+
+    @Test
+    void findAll_mixedSearch_returnsMatchingPosts() {
+        List<Post> posts = postRepository.findAll("spring", List.of("java"), 0, 10);
+        assertEquals(1, posts.size());
+        assertEquals("Spring MVC Guide", posts.getFirst().getTitle());
+    }
+
+    @Test
+    void count_mixedSearch_returnsMatchingCount() {
+        assertEquals(1, postRepository.count("spring", List.of("java")));
     }
 
     @Test
@@ -250,6 +262,7 @@ class JdbcNativePostRepositoryTest {
     @Test
     void create_tagsStoredWithSpacePaddingAllowTagFiltering() {
         Post post = new Post(null, "Tag Filter Test", "text", 0, List.of("unique"), 0);
+
         postRepository.create(post);
 
         List<Post> found = postRepository.findAll("", List.of("unique"), 0, 10);

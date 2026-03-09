@@ -18,7 +18,7 @@ public class JdbcNativeCommentRepository implements CommentRepository {
     @Override
     public List<Comment> findAllByPostId(Long postId) {
         return jdbcTemplate.query(
-                "SELECT id, text, post_id FROM comments WHERE post_id = ?",
+                "SELECT id, text, post_id FROM comments WHERE post_id = ? ORDER BY id",
                 (rs, rowNum) -> new Comment(rs.getLong("id"), rs.getString("text"), rs.getLong("post_id")),
                 postId
         );
