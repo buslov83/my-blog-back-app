@@ -71,7 +71,9 @@ public class PostController {
     }
 
     @GetMapping("/{id}/comments")
-    public List<CommentDto> getComments(@PathVariable("id") long id) {
-        return commentService.getCommentsByPostId(id);
+    public ResponseEntity<List<CommentDto>> getComments(@PathVariable("id") long id) {
+        return commentService.getCommentsByPostId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

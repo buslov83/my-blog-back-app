@@ -4,24 +4,33 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.CommentDto;
 import ru.practicum.mapper.CommentMapper;
 import ru.practicum.repository.CommentRepository;
+import ru.practicum.repository.PostRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final PostRepository postRepository;
 
-    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper) {
+    public CommentServiceImpl(CommentRepository commentRepository,
+                              CommentMapper commentMapper,
+                              PostRepository postRepository) {
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
+        this.postRepository = postRepository;
     }
 
     @Override
-    public List<CommentDto> getCommentsByPostId(Long postId) {
-        return commentRepository.findAllByPostId(postId).stream()
+    public Optional<List<CommentDto>> getCommentsByPostId(Long postId) {
+        if (!postRepository.existsById(postId)) {
+            return Optional.empty();
+        }
+        return Optional.of(commentRepository.findAllByPostId(postId).stream()
                 .map(commentMapper::toDto)
-                .toList();
+                .toList());
     }
 }
