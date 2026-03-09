@@ -73,7 +73,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Optional<PostImage> getPostImage(long id) {
-        return postRepository.findImageById(id)
-                .filter(img -> img.data() != null && img.data().length > 0);
+        return postRepository.findImageById(id).filter(img -> img.data() != null && img.data().length > 0);
     }
 }
