@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -214,6 +215,37 @@ class PostControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.posts[0].title").value("Tagged Post"))
                 .andExpect(jsonPath("$.posts[0].tags", contains("spring", "boot")));
+    }
+
+    @Test
+    void updatePost_existingPost_returnsUpdatedPost() throws Exception {
+        String json = """
+                {"id":1,"title":"Updated Title","text":"Updated text content","tags":["foo","bar"]}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.text").value("Updated text content"))
+                .andExpect(jsonPath("$.tags", contains("foo", "bar")))
+                .andExpect(jsonPath("$.likesCount").value(3))
+                .andExpect(jsonPath("$.commentsCount").value(2));
+    }
+
+    @Test
+    void updatePost_nonExistingPost_returns404() throws Exception {
+        String json = """
+                {"id":999,"title":"Updated Title","text":"Updated text","tags":[]}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}", 999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
     }
 
     @Test

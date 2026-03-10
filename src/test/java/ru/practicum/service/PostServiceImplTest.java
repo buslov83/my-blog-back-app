@@ -10,6 +10,7 @@ import ru.practicum.domain.Post;
 import ru.practicum.domain.PostImage;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
+import ru.practicum.dto.UpdatePostDto;
 import ru.practicum.mapper.PostMapper;
 import ru.practicum.repository.PostRepository;
 
@@ -279,5 +280,35 @@ class PostServiceImplTest {
         Optional<PostImage> result = postService.getPostImage(1L);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void updatePost_existingPost_returnsDto() {
+        UpdatePostDto dto = new UpdatePostDto(1L, "Updated Title", "Updated text", List.of("foo"));
+        Post mappedPost = new Post(1L, "Updated Title", "Updated text", 0, List.of("foo"), 0);
+        when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
+        when(postRepository.update(mappedPost)).thenReturn(true);
+        Post dbPost = new Post(1L, "Updated Title", "Updated text", 2, List.of("foo"), 3);
+        when(postRepository.findById(1L)).thenReturn(Optional.of(dbPost));
+        PostDto updatedPostDto = new PostDto(1L, "Updated Title", "Updated text", List.of("foo"), 2, 3);
+        when(postMapper.toFullDto(dbPost)).thenReturn(updatedPostDto);
+
+        Optional<PostDto> result = postService.updatePost(dto);
+
+        assertTrue(result.isPresent());
+        assertEquals(updatedPostDto, result.get());
+    }
+
+    @Test
+    void updatePost_nonExistingPost_returnsEmpty() {
+        UpdatePostDto dto = new UpdatePostDto(999L, "Title", "Text", List.of());
+        Post mappedPost = new Post(999L, "Title", "Text", 0, List.of(), 0);
+        when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
+        when(postRepository.update(mappedPost)).thenReturn(false);
+
+        Optional<PostDto> result = postService.updatePost(dto);
+
+        assertTrue(result.isEmpty());
+        verify(postRepository, never()).findById(anyLong());
     }
 }

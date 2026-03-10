@@ -9,6 +9,7 @@ import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
+import ru.practicum.dto.UpdatePostDto;
 import ru.practicum.service.CommentService;
 import ru.practicum.service.PostService;
 
@@ -27,12 +28,6 @@ public class PostController {
         this.commentService = commentService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PostDto createPost(@RequestBody CreatePostDto dto) {
-        return postService.createPost(dto);
-    }
-
     @GetMapping
     public PostsPageDto getPosts(@RequestParam("search") String search,
                                  @RequestParam("pageNumber") int pageNumber,
@@ -43,6 +38,19 @@ public class PostController {
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPost(@PathVariable("id") long id) {
         return postService.getPost(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public PostDto createPost(@RequestBody CreatePostDto dto) {
+        return postService.createPost(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PostDto> updatePost(@RequestBody UpdatePostDto dto) {
+        return postService.updatePost(dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

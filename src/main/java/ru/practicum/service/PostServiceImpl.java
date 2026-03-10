@@ -6,6 +6,7 @@ import ru.practicum.domain.PostImage;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
+import ru.practicum.dto.UpdatePostDto;
 import ru.practicum.mapper.PostMapper;
 import ru.practicum.repository.PostRepository;
 
@@ -69,6 +70,15 @@ public class PostServiceImpl implements PostService {
         Post post = postMapper.fromCreateDto(dto);
         postRepository.create(post);
         return postMapper.toFullDto(post);
+    }
+
+    @Override
+    public Optional<PostDto> updatePost(UpdatePostDto dto) {
+        Post post = postMapper.fromUpdateDto(dto);
+        if (!postRepository.update(post)) {
+            return Optional.empty();
+        }
+        return postRepository.findById(dto.id()).map(postMapper::toFullDto);
     }
 
     @Override

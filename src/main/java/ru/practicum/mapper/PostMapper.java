@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.domain.Post;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
+import ru.practicum.dto.UpdatePostDto;
 
 @Component
 public class PostMapper {
@@ -12,6 +13,10 @@ public class PostMapper {
 
     public Post fromCreateDto(CreatePostDto dto) {
         return new Post(null, dto.title(), dto.text(), 0, dto.tags(), 0);
+    }
+
+    public Post fromUpdateDto(UpdatePostDto dto) {
+        return new Post(dto.id(), dto.title(), dto.text(), 0, dto.tags(), 0);
     }
 
     public PostDto toListDto(Post post) {

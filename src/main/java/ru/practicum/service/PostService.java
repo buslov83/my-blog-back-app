@@ -4,6 +4,7 @@ import ru.practicum.domain.PostImage;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
+import ru.practicum.dto.UpdatePostDto;
 
 import java.util.Optional;
 
@@ -14,6 +15,8 @@ public interface PostService {
     Optional<PostDto> getPost(long id);
 
     PostDto createPost(CreatePostDto dto);
+
+    Optional<PostDto> updatePost(UpdatePostDto dto);
 
     Optional<PostImage> getPostImage(long id);
 
