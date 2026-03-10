@@ -74,10 +74,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Optional<PostDto> updatePost(UpdatePostDto dto) {
-        Post post = postMapper.fromUpdateDto(dto);
-        if (!postRepository.update(post)) {
+        if (!postRepository.existsById(dto.id())) {
             return Optional.empty();
         }
+        postRepository.update(postMapper.fromUpdateDto(dto));
         return postRepository.findById(dto.id()).map(postMapper::toFullDto);
     }
 
@@ -93,6 +93,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public boolean updatePostImage(long id, byte[] data, String contentType) {
-        return postRepository.updateImage(id, data, contentType);
+        if (!postRepository.existsById(id)) {
+            return false;
+        }
+        postRepository.updateImage(id, data, contentType);
+        return true;
     }
 }

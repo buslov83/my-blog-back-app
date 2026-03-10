@@ -18,11 +18,11 @@ public interface PostRepository {
 
     void create(Post post);
 
-    boolean update(Post post);
+    void update(Post post);
 
     boolean delete(long id);
 
     Optional<PostImage> findImageById(long id);
 
-    boolean updateImage(long id, byte[] data, String contentType);
+    void updateImage(long id, byte[] data, String contentType);
 }

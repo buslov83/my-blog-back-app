@@ -244,6 +244,34 @@ class PostServiceImplTest {
     }
 
     @Test
+    void updatePost_existingPost_returnsDto() {
+        UpdatePostDto dto = new UpdatePostDto(1L, "Updated Title", "Updated text", List.of("foo"));
+        Post mappedPost = new Post(1L, "Updated Title", "Updated text", 0, List.of("foo"), 0);
+        when(postRepository.existsById(1L)).thenReturn(true);
+        when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
+        Post dbPost = new Post(1L, "Updated Title", "Updated text", 2, List.of("foo"), 3);
+        when(postRepository.findById(1L)).thenReturn(Optional.of(dbPost));
+        PostDto updatedPostDto = new PostDto(1L, "Updated Title", "Updated text", List.of("foo"), 2, 3);
+        when(postMapper.toFullDto(dbPost)).thenReturn(updatedPostDto);
+
+        Optional<PostDto> result = postService.updatePost(dto);
+
+        assertTrue(result.isPresent());
+        assertEquals(updatedPostDto, result.get());
+    }
+
+    @Test
+    void updatePost_nonExistingPost_returnsEmpty() {
+        UpdatePostDto dto = new UpdatePostDto(999L, "Title", "Text", List.of());
+        when(postRepository.existsById(999L)).thenReturn(false);
+
+        Optional<PostDto> result = postService.updatePost(dto);
+
+        assertTrue(result.isEmpty());
+        verify(postRepository, never()).findById(anyLong());
+    }
+
+    @Test
     void getPostImage_imageExists() {
         byte[] data = {1, 2, 3};
         when(postRepository.findImageById(1L)).thenReturn(Optional.of(new PostImage(data, "image/jpeg")));
@@ -283,32 +311,23 @@ class PostServiceImplTest {
     }
 
     @Test
-    void updatePost_existingPost_returnsDto() {
-        UpdatePostDto dto = new UpdatePostDto(1L, "Updated Title", "Updated text", List.of("foo"));
-        Post mappedPost = new Post(1L, "Updated Title", "Updated text", 0, List.of("foo"), 0);
-        when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
-        when(postRepository.update(mappedPost)).thenReturn(true);
-        Post dbPost = new Post(1L, "Updated Title", "Updated text", 2, List.of("foo"), 3);
-        when(postRepository.findById(1L)).thenReturn(Optional.of(dbPost));
-        PostDto updatedPostDto = new PostDto(1L, "Updated Title", "Updated text", List.of("foo"), 2, 3);
-        when(postMapper.toFullDto(dbPost)).thenReturn(updatedPostDto);
+    void updatePostImage_existingPost_callsRepositoryAndReturnsTrue() {
+        byte[] data = {1, 2, 3};
+        when(postRepository.existsById(1L)).thenReturn(true);
 
-        Optional<PostDto> result = postService.updatePost(dto);
+        boolean result = postService.updatePostImage(1L, data, "image/jpeg");
 
-        assertTrue(result.isPresent());
-        assertEquals(updatedPostDto, result.get());
+        assertTrue(result);
+        verify(postRepository).updateImage(1L, data, "image/jpeg");
     }
 
     @Test
-    void updatePost_nonExistingPost_returnsEmpty() {
-        UpdatePostDto dto = new UpdatePostDto(999L, "Title", "Text", List.of());
-        Post mappedPost = new Post(999L, "Title", "Text", 0, List.of(), 0);
-        when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
-        when(postRepository.update(mappedPost)).thenReturn(false);
+    void updatePostImage_nonExistingPost_returnsFalseAndSkipsUpdate() {
+        when(postRepository.existsById(999L)).thenReturn(false);
 
-        Optional<PostDto> result = postService.updatePost(dto);
+        boolean result = postService.updatePostImage(999L, new byte[]{1, 2, 3}, "image/png");
 
-        assertTrue(result.isEmpty());
-        verify(postRepository, never()).findById(anyLong());
+        assertFalse(result);
+        verify(postRepository, never()).updateImage(anyLong(), any(), anyString());
     }
 }

@@ -106,11 +106,9 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public boolean update(Post post) {
-        int updated = jdbcTemplate.update(
-                "UPDATE posts SET title = ?, text = ?, tags = ? WHERE id = ?",
+    public void update(Post post) {
+        jdbcTemplate.update("UPDATE posts SET title = ?, text = ?, tags = ? WHERE id = ?",
                 post.getTitle(), post.getText(), toTagString(post.getTags()), post.getId());
-        return updated > 0;
     }
 
     @Override
@@ -130,10 +128,9 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public boolean updateImage(long id, byte[] data, String contentType) {
-        int updated = jdbcTemplate.update("UPDATE posts SET image = ?, image_content_type = ? WHERE id = ?",
+    public void updateImage(long id, byte[] data, String contentType) {
+        jdbcTemplate.update("UPDATE posts SET image = ?, image_content_type = ? WHERE id = ?",
                 data, contentType, id);
-        return updated > 0;
     }
 
     private static String toTagString(List<String> tags) {

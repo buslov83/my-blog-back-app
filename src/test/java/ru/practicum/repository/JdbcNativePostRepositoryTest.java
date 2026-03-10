@@ -273,10 +273,10 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void update_existingPost_updatesFieldsAndReturnsTrue() {
+    void update_existingPost_updatesFields() {
         Post updated = new Post(2L, "Updated Title", "Updated text", 0, List.of("bar", "foo"), 0);
 
-        assertTrue(postRepository.update(updated));
+        postRepository.update(updated);
 
         Post found = postRepository.findById(2L).orElseThrow();
         assertEquals("Updated Title", found.getTitle());
@@ -284,12 +284,6 @@ class JdbcNativePostRepositoryTest {
         assertThat(found.getTags(), contains("bar", "foo"));
         assertEquals(1, found.getLikesCount()); // unchanged
         assertEquals(2, found.getCommentsCount()); // unchanged
-    }
-
-    @Test
-    void update_nonExistingPost_returnsFalse() {
-        Post post = new Post(999L, "Title", "Text", 0, List.of(), 0);
-        assertFalse(postRepository.update(post));
     }
 
     @Test
@@ -351,15 +345,10 @@ class JdbcNativePostRepositoryTest {
         byte[] imageData = new byte[]{10, 20, 30, 40};
         String contentType = "image/jpeg";
 
-        assertTrue(postRepository.updateImage(1L, imageData, contentType));
+        postRepository.updateImage(1L, imageData, contentType);
 
         PostImage postImage = postRepository.findImageById(1L).orElseThrow();
         assertArrayEquals(imageData, postImage.data());
         assertEquals(contentType, postImage.contentType());
-    }
-
-    @Test
-    void updateImage_nonExistentPost_returnsFalse() {
-        assertFalse(postRepository.updateImage(999L, new byte[]{1, 2, 3}, "image/png"));
     }
 }
