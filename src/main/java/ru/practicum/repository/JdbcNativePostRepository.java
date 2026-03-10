@@ -93,19 +93,24 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public void create(Post post) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String tagsStr = post.getTags() == null || post.getTags().isEmpty()
-                ? null
-                : " " + String.join(" ", post.getTags()) + " ";
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(
                     "INSERT INTO posts (title, text, tags, likes_count) VALUES (?, ?, ?, 0)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getText());
-            ps.setString(3, tagsStr);
+            ps.setString(3, toTagString(post.getTags()));
             return ps;
         }, keyHolder);
         post.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+    }
+
+    @Override
+    public boolean update(Post post) {
+        int updated = jdbcTemplate.update(
+                "UPDATE posts SET title = ?, text = ?, tags = ? WHERE id = ?",
+                post.getTitle(), post.getText(), toTagString(post.getTags()), post.getId());
+        return updated > 0;
     }
 
     @Override
@@ -123,6 +128,10 @@ public class JdbcNativePostRepository implements PostRepository {
         int updated = jdbcTemplate.update("UPDATE posts SET image = ?, image_content_type = ? WHERE id = ?",
                 data, contentType, id);
         return updated > 0;
+    }
+
+    private static String toTagString(List<String> tags) {
+        return tags == null || tags.isEmpty() ? null : " " + String.join(" ", tags) + " ";
     }
 
     private static List<String> parseTags(String tagsStr) {

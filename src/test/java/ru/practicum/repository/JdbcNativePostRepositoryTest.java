@@ -263,13 +263,54 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void create_tagsStoredWithSpacePaddingAllowTagFiltering() {
-        Post post = new Post(null, "Tag Filter Test", "text", 0, List.of("unique"), 0);
+        Post post = new Post(null, "Tag Filter Test", "text", 0, List.of("bar"), 0);
 
         postRepository.create(post);
 
-        List<Post> found = postRepository.findAll("", List.of("unique"), 0, 10);
+        List<Post> found = postRepository.findAll("", List.of("bar"), 0, 10);
         assertEquals(1, found.size());
         assertEquals("Tag Filter Test", found.getFirst().getTitle());
+    }
+
+    @Test
+    void update_existingPost_updatesFieldsAndReturnsTrue() {
+        Post updated = new Post(2L, "Updated Title", "Updated text", 0, List.of("bar", "foo"), 0);
+
+        assertTrue(postRepository.update(updated));
+
+        Post found = postRepository.findById(2L).orElseThrow();
+        assertEquals("Updated Title", found.getTitle());
+        assertEquals("Updated text", found.getText());
+        assertThat(found.getTags(), contains("bar", "foo"));
+        assertEquals(1, found.getLikesCount()); // unchanged
+        assertEquals(2, found.getCommentsCount()); // unchanged
+    }
+
+    @Test
+    void update_nonExistingPost_returnsFalse() {
+        Post post = new Post(999L, "Title", "Text", 0, List.of(), 0);
+        assertFalse(postRepository.update(post));
+    }
+
+    @Test
+    void update_tagsStoredWithSpacePaddingAllowTagFiltering() {
+        Post post = new Post(1L, "Spring MVC Guide", "Spring text", 0, List.of("bar"), 0);
+
+        postRepository.update(post);
+
+        List<Post> found = postRepository.findAll("", List.of("bar"), 0, 10);
+        assertEquals(1, found.size());
+        assertEquals("Spring MVC Guide", found.getFirst().getTitle());
+    }
+
+    @Test
+    void update_emptyTags_storesNullAndReturnsEmptyList() {
+        Post post = new Post(2L, "Hibernate ORM Tutorial", "Hibernate text", 0, List.of(), 0);
+
+        postRepository.update(post);
+
+        Post found = postRepository.findById(2L).orElseThrow();
+        assertTrue(found.getTags().isEmpty());
     }
 
     @Test

@@ -18,6 +18,8 @@ public interface PostRepository {
 
     void create(Post post);
 
+    boolean update(Post post);
+
     Optional<PostImage> findImageById(long id);
 
     boolean updateImage(long id, byte[] data, String contentType);
