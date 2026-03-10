@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.practicum.configuration.DataSourceConfiguration;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcNativeCommentRepository.class})
 @TestPropertySource(locations = "classpath:test-application.properties")
+@ActiveProfiles("test")
 class JdbcNativeCommentRepositoryTest {
 
     @Autowired
