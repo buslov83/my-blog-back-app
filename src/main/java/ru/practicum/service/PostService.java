@@ -18,6 +18,8 @@ public interface PostService {
 
     Optional<PostDto> updatePost(UpdatePostDto dto);
 
+    boolean deletePost(long id);
+
     Optional<PostImage> getPostImage(long id);
 
     boolean updatePostImage(long id, byte[] data, String contentType);

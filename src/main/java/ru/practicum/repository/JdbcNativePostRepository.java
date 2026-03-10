@@ -114,6 +114,12 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public boolean delete(long id) {
+        int deleted = jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+        return deleted > 0;
+    }
+
+    @Override
     public Optional<PostImage> findImageById(long id) {
         PostImage result = jdbcTemplate.query("SELECT image, image_content_type FROM posts WHERE id = ?",
                 resultSet -> resultSet.next()

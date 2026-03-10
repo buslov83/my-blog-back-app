@@ -23,6 +23,7 @@ import ru.practicum.WebConfiguration;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -245,6 +246,21 @@ class PostControllerIntegrationTest {
         mockMvc.perform(put("/api/posts/{id}", 999L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletePost_existingPost_returns204AndPostIsGone() throws Exception {
+        mockMvc.perform(delete("/api/posts/{id}", 1L))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/posts/{id}", 1L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletePost_nonExistingPost_returns404() throws Exception {
+        mockMvc.perform(delete("/api/posts/{id}", 999L))
                 .andExpect(status().isNotFound());
     }
 

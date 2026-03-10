@@ -314,6 +314,27 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
+    void delete_existingPost_returnsTrueAndPostIsDeleted() {
+        assertTrue(postRepository.delete(1L));
+        assertTrue(postRepository.findById(1L).isEmpty());
+    }
+
+    @Test
+    void delete_existingPostWithComments_cascadesDelete() {
+        // post 2 has 2 comments
+        assertTrue(postRepository.delete(2L));
+        assertTrue(postRepository.findById(2L).isEmpty());
+        Integer commentCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM comments WHERE post_id = ?", Integer.class, 2L);
+        assertEquals(0, commentCount);
+    }
+
+    @Test
+    void delete_nonExistingPost_returnsFalse() {
+        assertFalse(postRepository.delete(999L));
+    }
+
+    @Test
     void findImageById_nonExistentPost_returnsEmptyOptional() {
         assertTrue(postRepository.findImageById(999L).isEmpty());
     }

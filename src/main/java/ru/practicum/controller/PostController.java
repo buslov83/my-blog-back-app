@@ -55,6 +55,12 @@ public class PostController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePost(@PathVariable("id") long id) {
+        boolean deleted = postService.deletePost(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
     @PutMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updatePostImage(@PathVariable("id") long id,
                                                 @RequestPart("image") MultipartFile file) throws IOException {
