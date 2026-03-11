@@ -11,14 +11,6 @@ public class PostMapper {
 
     private static final int MAX_PREVIEW_LENGTH = 128;
 
-    public Post fromCreateDto(CreatePostDto dto) {
-        return new Post(null, dto.title(), dto.text(), 0, dto.tags(), 0);
-    }
-
-    public Post fromUpdateDto(UpdatePostDto dto) {
-        return new Post(dto.id(), dto.title(), dto.text(), 0, dto.tags(), 0);
-    }
-
     public PostDto toListDto(Post post) {
         String text = post.getText();
         if (text.length() > MAX_PREVIEW_LENGTH) {
@@ -31,5 +23,13 @@ public class PostMapper {
     public PostDto toFullDto(Post post) {
         return new PostDto(post.getId(), post.getTitle(), post.getText(), post.getTags(),
                 post.getLikesCount(), post.getCommentsCount());
+    }
+
+    public Post fromCreateDto(CreatePostDto dto) {
+        return new Post(null, dto.title(), dto.text(), 0, dto.tags(), 0);
+    }
+
+    public Post fromUpdateDto(UpdatePostDto dto) {
+        return new Post(dto.id(), dto.title(), dto.text(), 0, dto.tags(), 0);
     }
 }

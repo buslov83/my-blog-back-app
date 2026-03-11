@@ -56,6 +56,7 @@ class PostControllerIntegrationTest {
         jdbcTemplate.execute("DELETE FROM posts"); // cascades to comments
         // Reset identity sequence so DB generated IDs don't overlap with the explicit IDs below
         jdbcTemplate.execute("ALTER TABLE posts ALTER COLUMN id RESTART WITH 50");
+        jdbcTemplate.execute("ALTER TABLE comments ALTER COLUMN id RESTART WITH 50");
 
         jdbcTemplate.execute("""
                 INSERT INTO posts (id, title, text, image, image_content_type, likes_count, tags)
@@ -369,6 +370,52 @@ class PostControllerIntegrationTest {
         // comment 3 belongs to post 2, not post 1
         mockMvc.perform(get("/api/posts/{id}/comments/{cid}", 1L, 3L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createComment_success_returns201WithComment() throws Exception {
+        String json = """
+                {"text":"Hello","postId":1}
+                """;
+
+        mockMvc.perform(post("/api/posts/{id}/comments", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.text").value("Hello"))
+                .andExpect(jsonPath("$.postId").value(1));
+
+        mockMvc.perform(get("/api/posts/{id}/comments", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[2].text").value("Hello"))
+                .andExpect(jsonPath("$[2].postId").value(1));
+    }
+
+    @Test
+    void createComment_postNotFound_returns404() throws Exception {
+        String json = """
+                {"text":"Hello","postId":999}
+                """;
+
+        mockMvc.perform(post("/api/posts/{id}/comments", 999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createComment_postIdMismatch_returns400() throws Exception {
+        String json = """
+                {"text":"Hello","postId":2}
+                """;
+
+        mockMvc.perform(post("/api/posts/{id}/comments", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
     }
 
     @Configuration

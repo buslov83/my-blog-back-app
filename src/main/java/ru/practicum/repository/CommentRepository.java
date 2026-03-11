@@ -7,7 +7,9 @@ import java.util.Optional;
 
 public interface CommentRepository {
 
-    List<Comment> findAllByPostId(Long postId);
+    List<Comment> findAllByPostId(long postId);
 
-    Optional<Comment> findByIdAndPostId(Long commentId, Long postId);
+    Optional<Comment> findByIdAndPostId(long commentId, long postId);
+
+    void create(Comment comment);
 }

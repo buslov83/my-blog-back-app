@@ -95,4 +95,16 @@ class JdbcNativeCommentRepositoryTest {
         Optional<Comment> result = commentRepository.findByIdAndPostId(1L, 3L);
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void create_success_returnsCommentWithGeneratedId() {
+        Comment comment = new Comment(null, "New comment", 1L);
+        commentRepository.create(comment);
+
+        assertNotNull(comment.getId());
+        Optional<Comment> persisted = commentRepository.findByIdAndPostId(comment.getId(), 1L);
+        assertTrue(persisted.isPresent());
+        assertEquals("New comment", persisted.get().getText());
+        assertEquals(1L, persisted.get().getPostId());
+    }
 }

@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.domain.Comment;
 import ru.practicum.dto.CommentDto;
+import ru.practicum.dto.CreateCommentDto;
 import ru.practicum.mapper.CommentMapper;
 import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.PostRepository;
@@ -80,5 +81,33 @@ class CommentServiceImplTest {
 
         assertTrue(result.isPresent());
         assertTrue(result.get().isEmpty());
+    }
+
+    @Test
+    void createComment_postExists_returnsDto() {
+        CreateCommentDto dto = new CreateCommentDto("New comment", 10L);
+        when(postRepository.existsById(10L)).thenReturn(true);
+        Comment newComment = new Comment(null, "New comment", 10L);
+        when(commentMapper.fromCreateDto(dto)).thenReturn(newComment);
+        CommentDto expectedDto = new CommentDto(99L, "New comment", 10L);
+        when(commentMapper.toDto(newComment)).thenReturn(expectedDto);
+
+        Optional<CommentDto> result = commentService.createComment(dto);
+
+        assertTrue(result.isPresent());
+        assertEquals(expectedDto, result.get());
+        verify(commentRepository).create(newComment);
+    }
+
+    @Test
+    void createComment_postDoesNotExist_returnsEmpty() {
+        CreateCommentDto dto = new CreateCommentDto("New comment", 999L);
+        when(postRepository.existsById(999L)).thenReturn(false);
+
+        Optional<CommentDto> result = commentService.createComment(dto);
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(commentRepository);
+        verifyNoInteractions(commentMapper);
     }
 }

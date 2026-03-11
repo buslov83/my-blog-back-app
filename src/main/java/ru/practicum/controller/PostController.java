@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.practicum.dto.CommentDto;
+import ru.practicum.dto.CreateCommentDto;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
@@ -102,6 +103,17 @@ public class PostController {
     public ResponseEntity<CommentDto> getComment(@PathVariable("id") long id, @PathVariable("cid") long cid) {
         return commentService.getCommentByPostIdAndCommentId(id, cid)
                 .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<CommentDto> createComment(@PathVariable("id") long id,
+                                                    @RequestBody CreateCommentDto dto) {
+        if (dto.postId() == null || dto.postId() != id) {
+            return ResponseEntity.badRequest().build();
+        }
+        return commentService.createComment(dto)
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .orElse(ResponseEntity.notFound().build());
     }
 }
