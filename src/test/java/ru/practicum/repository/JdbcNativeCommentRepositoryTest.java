@@ -11,6 +11,7 @@ import ru.practicum.configuration.DataSourceConfiguration;
 import ru.practicum.domain.Comment;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -44,6 +45,12 @@ class JdbcNativeCommentRepositoryTest {
                 "INSERT INTO posts (id, title, text, likes_count) VALUES (?,?,?,?)",
                 2L, "Post with no comments", "text", 0
         );
+
+        jdbcTemplate.update(
+                "INSERT INTO posts (id, title, text, likes_count) VALUES (?,?,?,?)",
+                3L, "Post with a single comment", "text", 0
+        );
+        jdbcTemplate.update("INSERT INTO comments (id, text, post_id) VALUES (?,?,?)", 3L, "Only comment", 3L);
     }
 
     @Test
@@ -56,7 +63,7 @@ class JdbcNativeCommentRepositoryTest {
     }
 
     @Test
-    void findAllByPostId_postWithNoComments_returnsEmptyList() {
+    void findAllByPostId_postWithoutComments_returnsEmptyList() {
         List<Comment> comments = commentRepository.findAllByPostId(2L);
         assertTrue(comments.isEmpty());
     }
@@ -65,5 +72,27 @@ class JdbcNativeCommentRepositoryTest {
     void findAllByPostId_nonExistentPost_returnsEmptyList() {
         List<Comment> comments = commentRepository.findAllByPostId(999L);
         assertTrue(comments.isEmpty());
+    }
+
+    @Test
+    void findByIdAndPostId_exists_returnsComment() {
+        Optional<Comment> result = commentRepository.findByIdAndPostId(1L, 1L);
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+        assertEquals("First comment", result.get().getText());
+        assertEquals(1L, result.get().getPostId());
+    }
+
+    @Test
+    void findByIdAndPostId_commentNotFound_returnsEmpty() {
+        Optional<Comment> result = commentRepository.findByIdAndPostId(999L, 1L);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findByIdAndPostId_commentBelongsToDifferentPost_returnsEmpty() {
+        // comment 1 belongs to post 1, not post 3
+        Optional<Comment> result = commentRepository.findByIdAndPostId(1L, 3L);
+        assertTrue(result.isEmpty());
     }
 }

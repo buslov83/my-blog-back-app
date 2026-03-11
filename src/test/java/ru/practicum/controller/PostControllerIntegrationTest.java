@@ -348,6 +348,29 @@ class PostControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void getComment_found_returnsComment() throws Exception {
+        mockMvc.perform(get("/api/posts/{id}/comments/{cid}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.postId").value(1))
+                .andExpect(jsonPath("$.text").value("Отличная статья, очень доступно объяснено!"));
+    }
+
+    @Test
+    void getComment_notFound_returns404() throws Exception {
+        mockMvc.perform(get("/api/posts/{id}/comments/{cid}", 1L, 999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getComment_commentBelongsToDifferentPost_returns404() throws Exception {
+        // comment 3 belongs to post 2, not post 1
+        mockMvc.perform(get("/api/posts/{id}/comments/{cid}", 1L, 3L))
+                .andExpect(status().isNotFound());
+    }
+
     @Configuration
     static class TestConfig implements WebMvcConfigurer {
         @Override

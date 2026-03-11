@@ -97,4 +97,11 @@ public class PostController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/{id}/comments/{cid}")
+    public ResponseEntity<CommentDto> getComment(@PathVariable("id") long id, @PathVariable("cid") long cid) {
+        return commentService.getCommentByPostIdAndCommentId(id, cid)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

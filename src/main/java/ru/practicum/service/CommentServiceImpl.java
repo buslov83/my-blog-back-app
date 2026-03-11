@@ -25,6 +25,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    public Optional<CommentDto> getCommentByPostIdAndCommentId(Long postId, Long commentId) {
+        return commentRepository.findByIdAndPostId(commentId, postId).map(commentMapper::toDto);
+    }
+
+    @Override
     public Optional<List<CommentDto>> getCommentsByPostId(Long postId) {
         if (!postRepository.existsById(postId)) {
             return Optional.empty();
