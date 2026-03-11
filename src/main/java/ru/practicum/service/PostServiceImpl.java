@@ -82,6 +82,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Optional<Integer> incrementLikes(long id) {
+        if (!postRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        postRepository.incrementLikes(id);
+        return postRepository.findById(id).map(Post::getLikesCount);
+    }
+
+    @Override
     public boolean deletePost(long id) {
         return postRepository.delete(id);
     }

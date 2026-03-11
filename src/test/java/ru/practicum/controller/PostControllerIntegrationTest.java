@@ -265,6 +265,21 @@ class PostControllerIntegrationTest {
     }
 
     @Test
+    void incrementLikes_existingPost_returnsNewCount() throws Exception {
+        // post 1 has likes_count = 3 initially
+        mockMvc.perform(post("/api/posts/1/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string("4"));
+    }
+
+    @Test
+    void incrementLikes_nonExistingPost_returns404() throws Exception {
+        mockMvc.perform(post("/api/posts/999/likes"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void updateAndGetImage_success() throws Exception {
         byte[] pngStub = new byte[]{(byte) 137, 80, 78, 71};
         MockMultipartFile file = new MockMultipartFile("image", "photo.png", "image/png", pngStub);

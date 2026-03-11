@@ -61,6 +61,13 @@ public class PostController {
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<Integer> incrementLikes(@PathVariable("id") long id) {
+        return postService.incrementLikes(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updatePostImage(@PathVariable("id") long id,
                                                 @RequestPart("image") MultipartFile file) throws IOException {

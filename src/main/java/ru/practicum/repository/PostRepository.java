@@ -20,6 +20,8 @@ public interface PostRepository {
 
     void update(Post post);
 
+    void incrementLikes(long id);
+
     boolean delete(long id);
 
     Optional<PostImage> findImageById(long id);

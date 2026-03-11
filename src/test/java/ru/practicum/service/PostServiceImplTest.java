@@ -272,6 +272,29 @@ class PostServiceImplTest {
     }
 
     @Test
+    void incrementLikes_existingPost_returnsNewCount() {
+        when(postRepository.existsById(1L)).thenReturn(true);
+        Post updatedPost = new Post(1L, "title", "text", 6, List.of(), 0);
+        when(postRepository.findById(1L)).thenReturn(Optional.of(updatedPost));
+
+        Optional<Integer> result = postService.incrementLikes(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(6, result.get());
+        verify(postRepository).incrementLikes(1L);
+    }
+
+    @Test
+    void incrementLikes_nonExistingPost_returnsEmpty() {
+        when(postRepository.existsById(999L)).thenReturn(false);
+
+        Optional<Integer> result = postService.incrementLikes(999L);
+
+        assertTrue(result.isEmpty());
+        verify(postRepository, never()).incrementLikes(anyLong());
+    }
+
+    @Test
     void getPostImage_imageExists() {
         byte[] data = {1, 2, 3};
         when(postRepository.findImageById(1L)).thenReturn(Optional.of(new PostImage(data, "image/jpeg")));

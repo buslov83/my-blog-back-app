@@ -18,6 +18,8 @@ public interface PostService {
 
     Optional<PostDto> updatePost(UpdatePostDto dto);
 
+    Optional<Integer> incrementLikes(long id);
+
     boolean deletePost(long id);
 
     Optional<PostImage> getPostImage(long id);

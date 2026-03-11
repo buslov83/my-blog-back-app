@@ -308,6 +308,15 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
+    void incrementLikes_existingPost_incrementsLikesCount() {
+        // post 1 starts with likes_count = 3
+        postRepository.incrementLikes(1L);
+
+        Post found = postRepository.findById(1L).orElseThrow();
+        assertEquals(4, found.getLikesCount());
+    }
+
+    @Test
     void delete_existingPost_returnsTrueAndPostIsDeleted() {
         assertTrue(postRepository.delete(1L));
         assertTrue(postRepository.findById(1L).isEmpty());
