@@ -418,6 +418,75 @@ class PostControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void updateComment_success_returnsUpdatedComment() throws Exception {
+        String json = """
+                {"id":1,"text":"Updated comment text","postId":1}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}/comments/{cid}", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.text").value("Updated comment text"))
+                .andExpect(jsonPath("$.postId").value(1));
+
+        mockMvc.perform(get("/api/posts/{id}/comments/{cid}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.text").value("Updated comment text"));
+    }
+
+    @Test
+    void updateComment_commentNotFound_returns404() throws Exception {
+        String json = """
+                {"id":999,"text":"Updated text","postId":1}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}/comments/{cid}", 1L, 999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateComment_commentBelongsToDifferentPost_returns404() throws Exception {
+        // comment 3 belongs to post 2, not post 1
+        String json = """
+                {"id":3,"text":"Updated text","postId":1}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}/comments/{cid}", 1L, 3L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateComment_commentIdMismatch_returns400() throws Exception {
+        String json = """
+                {"id":2,"text":"Updated text","postId":1}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}/comments/{cid}", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateComment_postIdMismatch_returns400() throws Exception {
+        String json = """
+                {"id":1,"text":"Updated text","postId":2}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}/comments/{cid}", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
     @Configuration
     static class TestConfig implements WebMvcConfigurer {
         @Override

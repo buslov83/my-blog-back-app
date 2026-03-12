@@ -249,15 +249,16 @@ class PostServiceImplTest {
         Post mappedPost = new Post(1L, "Updated Title", "Updated text", 0, List.of("foo"), 0);
         when(postRepository.existsById(1L)).thenReturn(true);
         when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
-        Post dbPost = new Post(1L, "Updated Title", "Updated text", 2, List.of("foo"), 3);
-        when(postRepository.findById(1L)).thenReturn(Optional.of(dbPost));
+        Post updated = new Post(1L, "Updated Title", "Updated text", 2, List.of("foo"), 3);
+        when(postRepository.findById(1L)).thenReturn(Optional.of(updated));
         PostDto updatedPostDto = new PostDto(1L, "Updated Title", "Updated text", List.of("foo"), 2, 3);
-        when(postMapper.toFullDto(dbPost)).thenReturn(updatedPostDto);
+        when(postMapper.toFullDto(updated)).thenReturn(updatedPostDto);
 
         Optional<PostDto> result = postService.updatePost(dto);
 
         assertTrue(result.isPresent());
         assertEquals(updatedPostDto, result.get());
+        verify(postRepository).update(mappedPost);
     }
 
     @Test
@@ -268,6 +269,7 @@ class PostServiceImplTest {
         Optional<PostDto> result = postService.updatePost(dto);
 
         assertTrue(result.isEmpty());
+        verify(postRepository, never()).update(any());
         verify(postRepository, never()).findById(anyLong());
     }
 

@@ -15,4 +15,8 @@ public class CommentMapper {
     public Comment fromCreateDto(CreateCommentDto dto) {
         return new Comment(null, dto.text(), dto.postId());
     }
+
+    public Comment fromDto(CommentDto dto) {
+        return new Comment(dto.id(), dto.text(), dto.postId());
+    }
 }

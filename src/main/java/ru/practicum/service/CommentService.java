@@ -13,4 +13,6 @@ public interface CommentService {
     Optional<CommentDto> getCommentByPostIdAndCommentId(long postId, long commentId);
 
     Optional<CommentDto> createComment(CreateCommentDto dto);
+
+    Optional<CommentDto> updateComment(CommentDto dto);
 }

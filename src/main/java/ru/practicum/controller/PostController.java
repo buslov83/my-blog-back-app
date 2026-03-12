@@ -116,4 +116,16 @@ public class PostController {
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/comments/{cid}")
+    public ResponseEntity<CommentDto> updateComment(@PathVariable("id") long id,
+                                                    @PathVariable("cid") long cid,
+                                                    @RequestBody CommentDto dto) {
+        if (dto.id() == null || dto.id() != cid || dto.postId() == null || dto.postId() != id) {
+            return ResponseEntity.badRequest().build();
+        }
+        return commentService.updateComment(dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

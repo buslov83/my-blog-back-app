@@ -50,4 +50,14 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.create(comment);
         return Optional.of(commentMapper.toDto(comment));
     }
+
+    @Override
+    public Optional<CommentDto> updateComment(CommentDto dto) {
+        // validate both comment existence and post ownership
+        if (commentRepository.findByIdAndPostId(dto.id(), dto.postId()).isEmpty()) {
+            return Optional.empty();
+        }
+        commentRepository.update(commentMapper.fromDto(dto));
+        return Optional.of(dto);
+    }
 }

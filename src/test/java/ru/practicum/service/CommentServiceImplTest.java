@@ -110,4 +110,29 @@ class CommentServiceImplTest {
         verifyNoInteractions(commentRepository);
         verifyNoInteractions(commentMapper);
     }
+
+    @Test
+    void updateComment_commentExists_returnsUpdatedDto() {
+        when(commentRepository.findByIdAndPostId(1L, 10L)).thenReturn(Optional.of(comment1));
+        CommentDto dto = new CommentDto(1L, "Updated text", 10L);
+        Comment mappedComment = new Comment(1L, "Updated text", 10L);
+        when(commentMapper.fromDto(dto)).thenReturn(mappedComment);
+
+        Optional<CommentDto> result = commentService.updateComment(dto);
+
+        assertTrue(result.isPresent());
+        assertEquals(dto, result.get());
+        verify(commentRepository).update(mappedComment);
+    }
+
+    @Test
+    void updateComment_commentNotFound_returnsEmpty() {
+        CommentDto dto = new CommentDto(999L, "Updated text", 10L);
+        when(commentRepository.findByIdAndPostId(999L, 10L)).thenReturn(Optional.empty());
+
+        Optional<CommentDto> result = commentService.updateComment(dto);
+
+        assertTrue(result.isEmpty());
+        verify(commentRepository, never()).update(any());
+    }
 }
