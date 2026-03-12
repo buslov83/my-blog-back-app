@@ -12,4 +12,6 @@ public interface CommentRepository {
     Optional<Comment> findByIdAndPostId(long commentId, long postId);
 
     void create(Comment comment);
+
+    void update(Comment comment);
 }

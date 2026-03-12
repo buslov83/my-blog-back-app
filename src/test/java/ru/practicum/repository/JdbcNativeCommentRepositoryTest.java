@@ -107,4 +107,14 @@ class JdbcNativeCommentRepositoryTest {
         assertEquals("New comment", persisted.get().getText());
         assertEquals(1L, persisted.get().getPostId());
     }
+
+    @Test
+    void update_existingComment() {
+        commentRepository.update(new Comment(1L, "Updated text", 1L));
+
+        List<Comment> comments = commentRepository.findAllByPostId(1L);
+        assertEquals(2, comments.size());
+        assertEquals("Updated text", comments.getFirst().getText());
+        assertEquals("Second comment", comments.getLast().getText());
+    }
 }

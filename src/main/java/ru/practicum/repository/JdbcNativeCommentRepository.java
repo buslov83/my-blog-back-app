@@ -52,4 +52,9 @@ public class JdbcNativeCommentRepository implements CommentRepository {
         }, keyHolder);
         comment.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
     }
+
+    @Override
+    public void update(Comment comment) {
+        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ?", comment.getText(), comment.getId());
+    }
 }
