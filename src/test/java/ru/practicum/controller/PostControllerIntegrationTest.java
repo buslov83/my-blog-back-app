@@ -251,9 +251,9 @@ class PostControllerIntegrationTest {
     }
 
     @Test
-    void deletePost_existingPost_returns204AndPostIsGone() throws Exception {
+    void deletePost_existingPost_returns200AndPostIsDeleted() throws Exception {
         mockMvc.perform(delete("/api/posts/{id}", 1L))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/posts/{id}", 1L))
                 .andExpect(status().isNotFound());
@@ -286,7 +286,7 @@ class PostControllerIntegrationTest {
         MockMultipartFile file = new MockMultipartFile("image", "photo.png", "image/png", pngStub);
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/posts/{id}/image", 1L).file(file))
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/posts/{id}/image", 1L))
                 .andExpect(status().isOk())

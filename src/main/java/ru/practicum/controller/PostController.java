@@ -59,7 +59,7 @@ public class PostController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable("id") long id) {
         boolean deleted = postService.deletePost(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/{id}/likes")
@@ -80,7 +80,7 @@ public class PostController {
             return ResponseEntity.badRequest().body("Content type is missing");
         }
         boolean updated = postService.updatePostImage(id, file.getBytes(), contentType);
-        return updated ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.notFound().build();
+        return updated ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/image")

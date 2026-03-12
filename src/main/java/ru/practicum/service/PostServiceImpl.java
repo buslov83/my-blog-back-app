@@ -33,9 +33,8 @@ public class PostServiceImpl implements PostService {
         if (search != null && !search.isBlank()) {
             for (String word : search.trim().split("\\s+")) {
                 if (word.startsWith("#")) {
-                    String tag = word.substring(1);
-                    if (!tag.isEmpty()) {
-                        tags.add(tag);
+                    if (word.length() > 1) {
+                        tags.add(word.substring(1));
                     }
                 } else {
                     titleWords.add(word);
