@@ -15,4 +15,6 @@ public interface CommentService {
     Optional<CommentDto> createComment(CreateCommentDto dto);
 
     Optional<CommentDto> updateComment(CommentDto dto);
+
+    boolean deleteComment(long postId, long commentId);
 }

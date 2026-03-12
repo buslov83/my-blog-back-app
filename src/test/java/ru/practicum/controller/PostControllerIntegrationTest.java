@@ -64,22 +64,23 @@ class PostControllerIntegrationTest {
                         'Spring Framework — это мощный Java-фреймворк для создания enterprise-приложений. Он предоставляет инверсию управления (IoC) и внедрение зависимостей (DI), что упрощает разработку и тестирование кода.',
                         NULL, NULL, 3, NULL)
                 """);
+        jdbcTemplate.execute("INSERT INTO comments (id, text, post_id) VALUES (1, 'Отличная статья, очень доступно объяснено!', 1)");
+        jdbcTemplate.execute("INSERT INTO comments (id, text, post_id) VALUES (2, 'Спасибо, давно искал хорошее введение в Spring.', 1)");
+
         jdbcTemplate.execute("""
                 INSERT INTO posts (id, title, text, image, image_content_type, likes_count, tags)
                 VALUES (2, 'Работа с Hibernate ORM',
                         'Hibernate — популярный ORM-фреймворк для Java, который позволяет работать с реляционными базами данных через объектно-ориентированную модель. Основные концепции: Session, Transaction и HQL.',
                         NULL, NULL, 1, ' java orm hibernate ')
                 """);
+        jdbcTemplate.execute("INSERT INTO comments (id, text, post_id) VALUES (3, 'Полезный материал про Hibernate, жду продолжения.', 2)");
+
         jdbcTemplate.execute("""
                 INSERT INTO posts (id, title, text, image, image_content_type, likes_count, tags)
                 VALUES (3, 'Паттерны проектирования в Java',
                         'Паттерны проектирования — это типовые решения часто встречающихся проблем при проектировании программ. В Java широко применяются паттерны: Singleton, Factory, Builder, Strategy и Observer.',
                         NULL, NULL, 7, ' java design oop patterns ')
                 """);
-
-        jdbcTemplate.execute("INSERT INTO comments (id, text, post_id) VALUES (1, 'Отличная статья, очень доступно объяснено!', 1)");
-        jdbcTemplate.execute("INSERT INTO comments (id, text, post_id) VALUES (2, 'Спасибо, давно искал хорошее введение в Spring.', 1)");
-        jdbcTemplate.execute("INSERT INTO comments (id, text, post_id) VALUES (3, 'Полезный материал про Hibernate, жду продолжения.', 2)");
     }
 
     @Test
@@ -485,6 +486,34 @@ class PostControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteComment_found_returns200() throws Exception {
+        mockMvc.perform(delete("/api/posts/{id}/comments/{cid}", 1L, 1L))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/posts/{id}/comments/{cid}", 1L, 1L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteComment_notFound_returns404() throws Exception {
+        mockMvc.perform(delete("/api/posts/{id}/comments/{cid}", 1L, 999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteComment_commentBelongsToDifferentPost_returns404() throws Exception {
+        // comment 3 belongs to post 2, not post 1
+        mockMvc.perform(delete("/api/posts/{id}/comments/{cid}", 1L, 3L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteComment_postNotFound_returns404() throws Exception {
+        mockMvc.perform(delete("/api/posts/{id}/comments/{cid}", 999L, 1L))
+                .andExpect(status().isNotFound());
     }
 
     @Configuration

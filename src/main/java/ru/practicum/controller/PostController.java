@@ -128,4 +128,11 @@ public class PostController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/{id}/comments/{cid}")
+    public ResponseEntity<Void> deleteComment(@PathVariable("id") long id,
+                                              @PathVariable("cid") long cid) {
+        boolean deleted = commentService.deleteComment(id, cid);
+        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    }
 }

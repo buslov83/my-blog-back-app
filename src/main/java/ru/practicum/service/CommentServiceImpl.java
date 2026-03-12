@@ -60,4 +60,9 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.update(commentMapper.fromDto(dto));
         return Optional.of(dto);
     }
+
+    @Override
+    public boolean deleteComment(long postId, long commentId) {
+        return commentRepository.deleteByIdAndPostId(commentId, postId);
+    }
 }

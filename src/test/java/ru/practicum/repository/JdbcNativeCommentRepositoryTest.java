@@ -117,4 +117,29 @@ class JdbcNativeCommentRepositoryTest {
         assertEquals("Updated text", comments.getFirst().getText());
         assertEquals("Second comment", comments.getLast().getText());
     }
+
+    @Test
+    void deleteByIdAndPostId_existingComment_returnsTrue() {
+        boolean result = commentRepository.deleteByIdAndPostId(1L, 1L);
+
+        assertTrue(result);
+        assertTrue(commentRepository.findByIdAndPostId(1L, 1L).isEmpty());
+        assertEquals(1, commentRepository.findAllByPostId(1L).size());
+    }
+
+    @Test
+    void deleteByIdAndPostId_wrongPostId_returnsFalse() {
+        // comment 1 belongs to post 1, not post 3
+        boolean result = commentRepository.deleteByIdAndPostId(1L, 3L);
+
+        assertFalse(result);
+        assertTrue(commentRepository.findByIdAndPostId(1L, 1L).isPresent());
+    }
+
+    @Test
+    void deleteByIdAndPostId_nonExistentComment_returnsFalse() {
+        boolean result = commentRepository.deleteByIdAndPostId(999L, 1L);
+
+        assertFalse(result);
+    }
 }
