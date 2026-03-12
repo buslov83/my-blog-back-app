@@ -1,7 +1,7 @@
 package ru.practicum.repository;
 
-import ru.practicum.domain.Post;
-import ru.practicum.domain.PostImage;
+import ru.practicum.model.Post;
+import ru.practicum.model.PostImage;
 
 import java.util.List;
 import java.util.Optional;

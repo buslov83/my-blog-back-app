@@ -5,8 +5,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.practicum.domain.Post;
-import ru.practicum.domain.PostImage;
+import ru.practicum.model.Post;
+import ru.practicum.model.PostImage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;

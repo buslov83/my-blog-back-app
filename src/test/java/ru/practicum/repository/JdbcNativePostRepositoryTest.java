@@ -8,12 +8,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.practicum.configuration.DataSourceConfiguration;
-import ru.practicum.domain.Post;
+import ru.practicum.model.Post;
 
 import java.util.List;
 import java.util.Optional;
 
-import ru.practicum.domain.PostImage;
+import ru.practicum.model.PostImage;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;

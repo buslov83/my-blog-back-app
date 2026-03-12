@@ -1,8 +1,8 @@
 package ru.practicum.service;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.domain.Post;
-import ru.practicum.domain.PostImage;
+import ru.practicum.model.Post;
+import ru.practicum.model.PostImage;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;

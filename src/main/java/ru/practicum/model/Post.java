@@ -1,4 +1,4 @@
-package ru.practicum.domain;
+package ru.practicum.model;
 
 import java.util.List;
 
@@ -8,16 +8,16 @@ public class Post {
     private String title;
     private String text;
     private PostImage postImage;
-    private int likesCount;
+    private Integer likesCount;
     private List<String> tags;
-    private int commentsCount;
+    private Integer commentsCount;
 
     public Post(Long id,
                 String title,
                 String text,
-                int likesCount,
+                Integer likesCount,
                 List<String> tags,
-                int commentsCount) {
+                Integer commentsCount) {
         this.id = id;
         this.title = title;
         this.text = text;
@@ -58,11 +58,11 @@ public class Post {
         this.postImage = postImage;
     }
 
-    public int getLikesCount() {
+    public Integer getLikesCount() {
         return likesCount;
     }
 
-    public void setLikesCount(int likesCount) {
+    public void setLikesCount(Integer likesCount) {
         this.likesCount = likesCount;
     }
 
@@ -74,11 +74,11 @@ public class Post {
         this.tags = tags;
     }
 
-    public int getCommentsCount() {
+    public Integer getCommentsCount() {
         return commentsCount;
     }
 
-    public void setCommentsCount(int commentsCount) {
+    public void setCommentsCount(Integer commentsCount) {
         this.commentsCount = commentsCount;
     }
 }

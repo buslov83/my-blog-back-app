@@ -1,4 +1,4 @@
-package ru.practicum.domain;
+package ru.practicum.model;
 
 public class Comment {
 

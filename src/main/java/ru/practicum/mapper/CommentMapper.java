@@ -1,7 +1,7 @@
 package ru.practicum.mapper;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.domain.Comment;
+import ru.practicum.model.Comment;
 import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.CreateCommentDto;
 

@@ -1,7 +1,7 @@
 package ru.practicum.mapper;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.domain.Post;
+import ru.practicum.model.Post;
 import ru.practicum.dto.CreatePostDto;
 
 import java.util.List;

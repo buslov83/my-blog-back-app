@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.practicum.configuration.DataSourceConfiguration;
-import ru.practicum.domain.Comment;
+import ru.practicum.model.Comment;
 
 import java.util.List;
 import java.util.Optional;

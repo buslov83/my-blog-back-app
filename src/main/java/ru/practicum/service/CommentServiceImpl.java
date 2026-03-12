@@ -1,7 +1,7 @@
 package ru.practicum.service;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.domain.Comment;
+import ru.practicum.model.Comment;
 import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.CreateCommentDto;
 import ru.practicum.mapper.CommentMapper;
@@ -27,11 +27,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Optional<CommentDto> getCommentByPostIdAndCommentId(long postId, long commentId) {
-        return commentRepository.findByIdAndPostId(commentId, postId).map(commentMapper::toDto);
-    }
-
-    @Override
     public Optional<List<CommentDto>> getCommentsByPostId(long postId) {
         if (!postRepository.existsById(postId)) {
             return Optional.empty();
@@ -39,6 +34,11 @@ public class CommentServiceImpl implements CommentService {
         return Optional.of(commentRepository.findAllByPostId(postId).stream()
                 .map(commentMapper::toDto)
                 .toList());
+    }
+
+    @Override
+    public Optional<CommentDto> getCommentByPostIdAndCommentId(long postId, long commentId) {
+        return commentRepository.findByIdAndPostId(commentId, postId).map(commentMapper::toDto);
     }
 
     @Override

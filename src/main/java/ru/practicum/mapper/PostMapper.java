@@ -1,7 +1,7 @@
 package ru.practicum.mapper;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.domain.Post;
+import ru.practicum.model.Post;
 import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.UpdatePostDto;
@@ -30,6 +30,6 @@ public class PostMapper {
     }
 
     public Post fromUpdateDto(UpdatePostDto dto) {
-        return new Post(dto.id(), dto.title(), dto.text(), 0, dto.tags(), 0);
+        return new Post(dto.id(), dto.title(), dto.text(), null, dto.tags(), null);
     }
 }
