@@ -48,6 +48,9 @@ public class DataSourceConfiguration {
         populator.execute(dataSource);
     }
 
+    /**
+     * Starts an H2 TCP server for remote DB access.
+     */
     @Profile("!test")
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2TcpServer() throws SQLException {
