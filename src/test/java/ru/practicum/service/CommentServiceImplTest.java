@@ -3,7 +3,7 @@ package ru.practicum.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.model.Comment;
@@ -27,38 +27,35 @@ class CommentServiceImplTest {
     private CommentRepository commentRepository;
 
     @Mock
-    private CommentMapper commentMapper;
-
-    @Mock
     private PostRepository postRepository;
 
-    @InjectMocks
+    private final CommentMapper commentMapper = new CommentMapper();
+
     private CommentServiceImpl commentService;
 
     private Comment comment1;
     private Comment comment2;
-    private CommentDto commentDto1;
-    private CommentDto commentDto2;
 
     @BeforeEach
     void setUp() {
+        commentService = new CommentServiceImpl(commentRepository, commentMapper, postRepository);
+
         comment1 = new Comment(1L, "First comment", 10L);
         comment2 = new Comment(2L, "Second comment", 10L);
-        commentDto1 = new CommentDto(1L, "First comment", 10L);
-        commentDto2 = new CommentDto(2L, "Second comment", 10L);
     }
 
     @Test
     void getCommentsByPostId_postExists_returnsMappedComments() {
         when(postRepository.existsById(10L)).thenReturn(true);
         when(commentRepository.findAllByPostId(10L)).thenReturn(List.of(comment1, comment2));
-        when(commentMapper.toDto(comment1)).thenReturn(commentDto1);
-        when(commentMapper.toDto(comment2)).thenReturn(commentDto2);
 
         Optional<List<CommentDto>> result = commentService.getCommentsByPostId(10L);
 
         assertTrue(result.isPresent());
-        assertEquals(List.of(commentDto1, commentDto2), result.get());
+        assertEquals(List.of(
+                        new CommentDto(1L, "First comment", 10L),
+                        new CommentDto(2L, "Second comment", 10L)),
+                result.get());
     }
 
     @Test
@@ -69,7 +66,6 @@ class CommentServiceImplTest {
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(commentRepository);
-        verifyNoInteractions(commentMapper);
     }
 
     @Test
@@ -84,19 +80,42 @@ class CommentServiceImplTest {
     }
 
     @Test
+    void getCommentByPostIdAndCommentId_commentExists_returnsDto() {
+        when(commentRepository.findByIdAndPostId(1L, 10L)).thenReturn(Optional.of(comment1));
+
+        Optional<CommentDto> result = commentService.getCommentByPostIdAndCommentId(10L, 1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(new CommentDto(1L, "First comment", 10L), result.get());
+    }
+
+    @Test
+    void getCommentByPostIdAndCommentId_commentNotFound_returnsEmpty() {
+        when(commentRepository.findByIdAndPostId(999L, 10L)).thenReturn(Optional.empty());
+
+        Optional<CommentDto> result = commentService.getCommentByPostIdAndCommentId(10L, 999L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void createComment_postExists_returnsDto() {
         CreateCommentDto dto = new CreateCommentDto("New comment", 10L);
         when(postRepository.existsById(10L)).thenReturn(true);
-        Comment newComment = new Comment(null, "New comment", 10L);
-        when(commentMapper.fromCreateDto(dto)).thenReturn(newComment);
-        CommentDto expectedDto = new CommentDto(99L, "New comment", 10L);
-        when(commentMapper.toDto(newComment)).thenReturn(expectedDto);
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Comment.class).setId(99L);
+            return null;
+        }).when(commentRepository).create(any(Comment.class));
 
         Optional<CommentDto> result = commentService.createComment(dto);
 
+        ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
+        verify(commentRepository).create(captor.capture());
+        assertEquals("New comment", captor.getValue().getText());
+        assertEquals(10L, captor.getValue().getPostId());
+
         assertTrue(result.isPresent());
-        assertEquals(expectedDto, result.get());
-        verify(commentRepository).create(newComment);
+        assertEquals(new CommentDto(99L, "New comment", 10L), result.get());
     }
 
     @Test
@@ -108,21 +127,23 @@ class CommentServiceImplTest {
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(commentRepository);
-        verifyNoInteractions(commentMapper);
     }
 
     @Test
     void updateComment_commentExists_returnsUpdatedDto() {
-        when(commentRepository.findByIdAndPostId(1L, 10L)).thenReturn(Optional.of(comment1));
         CommentDto dto = new CommentDto(1L, "Updated text", 10L);
-        Comment mappedComment = new Comment(1L, "Updated text", 10L);
-        when(commentMapper.fromDto(dto)).thenReturn(mappedComment);
+        when(commentRepository.findByIdAndPostId(1L, 10L)).thenReturn(Optional.of(comment1));
 
         Optional<CommentDto> result = commentService.updateComment(dto);
 
+        ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
+        verify(commentRepository).update(captor.capture());
+        assertEquals(1L, captor.getValue().getId());
+        assertEquals("Updated text", captor.getValue().getText());
+        assertEquals(10L, captor.getValue().getPostId());
+
         assertTrue(result.isPresent());
         assertEquals(dto, result.get());
-        verify(commentRepository).update(mappedComment);
     }
 
     @Test
@@ -134,5 +155,23 @@ class CommentServiceImplTest {
 
         assertTrue(result.isEmpty());
         verify(commentRepository, never()).update(any());
+    }
+
+    @Test
+    void deleteComment_commentExists_returnsTrue() {
+        when(commentRepository.deleteByIdAndPostId(1L, 10L)).thenReturn(true);
+
+        boolean result = commentService.deleteComment(10L, 1L);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void deleteComment_commentNotFound_returnsFalse() {
+        when(commentRepository.deleteByIdAndPostId(999L, 10L)).thenReturn(false);
+
+        boolean result = commentService.deleteComment(10L, 999L);
+
+        assertFalse(result);
     }
 }

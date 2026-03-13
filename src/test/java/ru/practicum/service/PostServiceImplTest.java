@@ -3,11 +3,12 @@ package ru.practicum.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.model.Post;
 import ru.practicum.model.PostImage;
+import ru.practicum.dto.CreatePostDto;
 import ru.practicum.dto.PostDto;
 import ru.practicum.dto.PostsPageDto;
 import ru.practicum.dto.UpdatePostDto;
@@ -27,10 +28,8 @@ class PostServiceImplTest {
     @Mock
     private PostRepository postRepository;
 
-    @Mock
-    private PostMapper postMapper;
+    private final PostMapper postMapper = new PostMapper();
 
-    @InjectMocks
     private PostServiceImpl postService;
 
     private Post post1;
@@ -40,6 +39,8 @@ class PostServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        postService = new PostServiceImpl(postRepository, postMapper);
+
         post1 = new Post(1L, "Spring Boot Guide", "Content of post 1", 5, List.of("spring", "java"), 3);
         post2 = new Post(2L, "Java Tips", "Content of post 2", 2, List.of("java"), 1);
         postDto1 = new PostDto(1L, "Spring Boot Guide", "Content of post 1", List.of("spring", "java"), 5, 3);
@@ -51,8 +52,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", Collections.emptyList(), 0, 10))
                 .thenReturn(List.of(post1, post2));
         when(postRepository.count("", Collections.emptyList())).thenReturn(2);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
-        when(postMapper.toListDto(post2)).thenReturn(postDto2);
 
         PostsPageDto result = postService.getPosts(null, 1, 10);
 
@@ -64,7 +63,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", Collections.emptyList(), 0, 10))
                 .thenReturn(List.of(post1));
         when(postRepository.count("", Collections.emptyList())).thenReturn(1);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
 
         PostsPageDto result = postService.getPosts("", 1, 10);
 
@@ -76,7 +74,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("Spring Boot", Collections.emptyList(), 0, 10))
                 .thenReturn(List.of(post1));
         when(postRepository.count("Spring Boot", Collections.emptyList())).thenReturn(1);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
 
         PostsPageDto result = postService.getPosts(" Spring   Boot ", 1, 10);
 
@@ -88,7 +85,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("Java", Collections.emptyList(), 0, 10))
                 .thenReturn(List.of(post2));
         when(postRepository.count("Java", Collections.emptyList())).thenReturn(1);
-        when(postMapper.toListDto(post2)).thenReturn(postDto2);
 
         PostsPageDto result = postService.getPosts("Java", 1, 10);
 
@@ -100,7 +96,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", List.of("spring", "java"), 0, 10))
                 .thenReturn(List.of(post1));
         when(postRepository.count("", List.of("spring", "java"))).thenReturn(1);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
 
         PostsPageDto result = postService.getPosts(" #spring #  #java ", 1, 10);
 
@@ -108,12 +103,10 @@ class PostServiceImplTest {
     }
 
     @Test
-    void getPosts_singleTagSearch_passesCorrectTag() {
+    void getPosts_singleTagSearch_passesEmptyTitleAndParsedTag() {
         when(postRepository.findAll("", List.of("java"), 0, 10))
                 .thenReturn(List.of(post1, post2));
         when(postRepository.count("", List.of("java"))).thenReturn(2);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
-        when(postMapper.toListDto(post2)).thenReturn(postDto2);
 
         PostsPageDto result = postService.getPosts("#java", 1, 10);
 
@@ -125,7 +118,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("Spring Boot", List.of("java", "spring"), 0, 10))
                 .thenReturn(List.of(post1));
         when(postRepository.count("Spring Boot", List.of("java", "spring"))).thenReturn(1);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
 
         PostsPageDto result = postService.getPosts(" Spring   #java  Boot #spring ", 1, 10);
 
@@ -151,8 +143,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", Collections.emptyList(), 0, 2))
                 .thenReturn(List.of(post1, post2));
         when(postRepository.count("", Collections.emptyList())).thenReturn(5);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
-        when(postMapper.toListDto(post2)).thenReturn(postDto2);
 
         PostsPageDto result = postService.getPosts(null, 1, 2);
 
@@ -167,7 +157,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", Collections.emptyList(), 4, 2))
                 .thenReturn(List.of(post1));
         when(postRepository.count("", Collections.emptyList())).thenReturn(5);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
 
         PostsPageDto result = postService.getPosts(null, 3, 2);
 
@@ -182,8 +171,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", Collections.emptyList(), 2, 2))
                 .thenReturn(List.of(post1, post2));
         when(postRepository.count("", Collections.emptyList())).thenReturn(6);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
-        when(postMapper.toListDto(post2)).thenReturn(postDto2);
 
         PostsPageDto result = postService.getPosts(null, 2, 2);
 
@@ -198,7 +185,6 @@ class PostServiceImplTest {
         when(postRepository.findAll("", Collections.emptyList(), 0, 10))
                 .thenReturn(List.of(post1));
         when(postRepository.count("", Collections.emptyList())).thenReturn(1);
-        when(postMapper.toListDto(post1)).thenReturn(postDto1);
 
         PostsPageDto result = postService.getPosts(null, 1, 10);
 
@@ -244,21 +230,76 @@ class PostServiceImplTest {
     }
 
     @Test
+    void getPosts_longText_isTruncatedTo128CharsWithEllipsis() {
+        Post longPost = new Post(3L, "Long Post", "a".repeat(200), 0, List.of(), 0);
+        when(postRepository.findAll("", Collections.emptyList(), 0, 10)).thenReturn(List.of(longPost));
+        when(postRepository.count("", Collections.emptyList())).thenReturn(1);
+
+        PostsPageDto result = postService.getPosts(null, 1, 10);
+
+        assertEquals("a".repeat(128) + "...", result.posts().getFirst().text());
+    }
+
+    @Test
+    void getPost_postExists_returnsFullDto() {
+        String longText = "a".repeat(200);
+        Post aPost = new Post(3L, "Long Post", longText, 3, List.of("foo", "bar"), 2);
+        when(postRepository.findById(3L)).thenReturn(Optional.of(aPost));
+
+        Optional<PostDto> result = postService.getPost(3L);
+
+        assertTrue(result.isPresent());
+        assertEquals(new PostDto(3L, "Long Post", longText, List.of("foo", "bar"), 3, 2), result.get());
+    }
+
+    @Test
+    void getPost_postNotFound_returnsEmpty() {
+        when(postRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Optional<PostDto> result = postService.getPost(999L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void createPost_savesPostAndReturnsDto() {
+        CreatePostDto dto = new CreatePostDto("New Post", "Some text", List.of("foo", "bar"));
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Post.class).setId(42L);
+            return null;
+        }).when(postRepository).create(any(Post.class));
+
+        PostDto result = postService.createPost(dto);
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).create(captor.capture());
+        assertEquals("New Post", captor.getValue().getTitle());
+        assertEquals("Some text", captor.getValue().getText());
+        assertEquals(List.of("foo", "bar"), captor.getValue().getTags());
+        assertEquals(0, captor.getValue().getLikesCount());
+        assertEquals(0, captor.getValue().getCommentsCount());
+
+        assertEquals(new PostDto(42L, "New Post", "Some text", List.of("foo", "bar"), 0, 0), result);
+    }
+
+    @Test
     void updatePost_existingPost_returnsDto() {
         UpdatePostDto dto = new UpdatePostDto(1L, "Updated Title", "Updated text", List.of("foo"));
-        Post mappedPost = new Post(1L, "Updated Title", "Updated text", 0, List.of("foo"), 0);
         when(postRepository.existsById(1L)).thenReturn(true);
-        when(postMapper.fromUpdateDto(dto)).thenReturn(mappedPost);
-        Post updated = new Post(1L, "Updated Title", "Updated text", 2, List.of("foo"), 3);
+        Post updated = new Post(1L, "Updated Title", "Updated text", 5, List.of("foo"), 3);
         when(postRepository.findById(1L)).thenReturn(Optional.of(updated));
-        PostDto updatedPostDto = new PostDto(1L, "Updated Title", "Updated text", List.of("foo"), 2, 3);
-        when(postMapper.toFullDto(updated)).thenReturn(updatedPostDto);
 
         Optional<PostDto> result = postService.updatePost(dto);
 
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).update(captor.capture());
+        assertEquals(1L, captor.getValue().getId());
+        assertEquals("Updated Title", captor.getValue().getTitle());
+        assertEquals("Updated text", captor.getValue().getText());
+        assertEquals(List.of("foo"), captor.getValue().getTags());
+
         assertTrue(result.isPresent());
-        assertEquals(updatedPostDto, result.get());
-        verify(postRepository).update(mappedPost);
+        assertEquals(new PostDto(1L, "Updated Title", "Updated text", List.of("foo"), 5, 3), result.get());
     }
 
     @Test
@@ -294,6 +335,15 @@ class PostServiceImplTest {
 
         assertTrue(result.isEmpty());
         verify(postRepository, never()).incrementLikes(anyLong());
+    }
+
+    @Test
+    void deletePost_delegatesToRepository() {
+        when(postRepository.delete(1L)).thenReturn(true);
+        assertTrue(postService.deletePost(1L));
+
+        when(postRepository.delete(999L)).thenReturn(false);
+        assertFalse(postService.deletePost(999L));
     }
 
     @Test
