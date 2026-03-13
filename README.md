@@ -24,7 +24,7 @@ Spring MVC blog web application backend (Java 21, WAR packaged) serving a REST A
 ./mvnw clean package -DskipTests   # skip tests
 ```
 
-Output: `target/spring-mvc-test.war`
+Output: `target/my-blog-back-app.war`
 
 ## Deploy to Tomcat 10.1.x
 
@@ -39,7 +39,7 @@ rm -r $CATALINA_HOME/webapps/ROOT
 rm $CATALINA_HOME/webapps/ROOT.war
 
 # Copy the built WAR
-cp target/spring-mvc-test.war $CATALINA_HOME/webapps/ROOT.war
+cp target/my-blog-back-app.war $CATALINA_HOME/webapps/ROOT.war
 ```
 
 ## Start, Stop & Restart
