@@ -1,0 +1,110 @@
+package ru.practicum.service;
+
+import org.springframework.stereotype.Service;
+import ru.practicum.model.Post;
+import ru.practicum.model.PostImage;
+import ru.practicum.dto.CreatePostDto;
+import ru.practicum.dto.PostDto;
+import ru.practicum.dto.PostsPageDto;
+import ru.practicum.dto.UpdatePostDto;
+import ru.practicum.mapper.PostMapper;
+import ru.practicum.repository.PostRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class PostServiceImpl implements PostService {
+
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
+
+    public PostServiceImpl(PostRepository postRepository, PostMapper postMapper) {
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
+    }
+
+    @Override
+    public PostsPageDto getPosts(String search, int pageNumber, int pageSize) {
+        List<String> tags = new ArrayList<>();
+        List<String> titleWords = new ArrayList<>();
+
+        if (search != null && !search.isBlank()) {
+            for (String word : search.trim().split("\\s+")) {
+                if (word.startsWith("#")) {
+                    if (word.length() > 1) {
+                        tags.add(word.substring(1));
+                    }
+                } else {
+                    titleWords.add(word);
+                }
+            }
+        }
+
+        String titleSearch = String.join(" ", titleWords);
+        int offset = (pageNumber - 1) * pageSize;
+
+        List<Post> posts = postRepository.findAll(titleSearch, tags, offset, pageSize);
+        int total = postRepository.count(titleSearch, tags);
+
+        int lastPage = Math.max(1, (int) Math.ceil((double) total / pageSize));
+        boolean hasPrev = pageNumber > 1;
+        boolean hasNext = pageNumber < lastPage;
+
+        List<PostDto> postDtos = posts.stream()
+                .map(postMapper::toListDto)
+                .toList();
+
+        return new PostsPageDto(postDtos, hasPrev, hasNext, lastPage);
+    }
+
+    @Override
+    public Optional<PostDto> getPost(long id) {
+        return postRepository.findById(id).map(postMapper::toFullDto);
+    }
+
+    @Override
+    public PostDto createPost(CreatePostDto dto) {
+        Post post = postMapper.fromCreateDto(dto);
+        postRepository.create(post);
+        return postMapper.toFullDto(post);
+    }
+
+    @Override
+    public Optional<PostDto> updatePost(UpdatePostDto dto) {
+        if (!postRepository.existsById(dto.id())) {
+            return Optional.empty();
+        }
+        postRepository.update(postMapper.fromUpdateDto(dto));
+        return postRepository.findById(dto.id()).map(postMapper::toFullDto);
+    }
+
+    @Override
+    public Optional<Integer> incrementLikes(long id) {
+        if (!postRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        postRepository.incrementLikes(id);
+        return postRepository.findById(id).map(Post::getLikesCount);
+    }
+
+    @Override
+    public boolean deletePost(long id) {
+        return postRepository.delete(id);
+    }
+
+    @Override
+    public Optional<PostImage> getPostImage(long id) {
+        return postRepository.findImageById(id).filter(img -> img.data() != null && img.data().length > 0);
+    }
+
+    @Override
+    public boolean updatePostImage(long id, byte[] data, String contentType) {
+        if (!postRepository.existsById(id)) {
+            return false;
+        }
+        postRepository.updateImage(id, data, contentType);
+        return true;
+    }
+}

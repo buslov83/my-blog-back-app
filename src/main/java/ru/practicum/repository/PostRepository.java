@@ -1,0 +1,30 @@
+package ru.practicum.repository;
+
+import ru.practicum.model.Post;
+import ru.practicum.model.PostImage;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface PostRepository {
+
+    List<Post> findAll(String titleSearch, List<String> tags, int offset, int limit);
+
+    int count(String titleSearch, List<String> tags);
+
+    Optional<Post> findById(long id);
+
+    boolean existsById(long id);
+
+    void create(Post post);
+
+    void update(Post post);
+
+    void incrementLikes(long id);
+
+    boolean delete(long id);
+
+    Optional<PostImage> findImageById(long id);
+
+    void updateImage(long id, byte[] data, String contentType);
+}
