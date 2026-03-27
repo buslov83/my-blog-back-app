@@ -4,10 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import ru.practicum.configuration.DataSourceConfiguration;
 import ru.practicum.model.Comment;
 
 import java.util.List;
@@ -17,8 +16,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcNativeCommentRepository.class})
-@TestPropertySource(locations = "classpath:test-application.properties")
+@DataJdbcTest
+@Import(JdbcNativeCommentRepository.class)
 @ActiveProfiles("test")
 class JdbcNativeCommentRepositoryTest {
 
@@ -30,7 +29,6 @@ class JdbcNativeCommentRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute("DELETE FROM posts"); // cascades to comments
         // Reset identity sequence so DB generated IDs don't overlap with the explicit IDs below
         jdbcTemplate.execute("ALTER TABLE comments ALTER COLUMN id RESTART WITH 50");
 
