@@ -12,27 +12,27 @@ Spring Boot blog web application backend (Java 21, embedded Tomcat) serving a RE
 | Data access       | Spring JDBC             | managed by Spring Boot   |
 | JSON              | Jackson                 | managed by Spring Boot   |
 | Servlet container | Embedded Tomcat         | managed by Spring Boot   |
-| Build tool        | Apache Maven            | 3.8.7                    |
+| Build tool        | Apache Gradle           | 8.14.4                   |
 | Testing           | JUnit 5, Mockito, Hamcrest | managed by Spring Boot |
 
 ## Build & Test
 
 ```bash
-./mvnw clean package               # compile + test + produce JAR
-./mvnw test                        # run tests only
-./mvnw clean package -DskipTests   # skip tests
+./gradlew build          # compile + test + produce JAR
+./gradlew test           # run tests only
+./gradlew build -x test  # skip tests
 ```
 
-Output: `target/my-blog-back-app.jar`
+Output: `build/libs/my-blog-back-app.jar`
 
 ## Run
 
 ```bash
-# Run with Maven (development)
-./mvnw spring-boot:run
+# Run with Gradle (development)
+./gradlew bootRun
 
 # Or run the JAR directly
-java -jar target/my-blog-back-app.jar
+java -jar build/libs/my-blog-back-app.jar
 ```
 
 The app starts on `http://localhost:8080/`.
