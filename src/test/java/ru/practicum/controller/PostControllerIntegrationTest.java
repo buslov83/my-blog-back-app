@@ -3,24 +3,14 @@ package ru.practicum.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import ru.practicum.WebConfiguration;
-
-import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -28,31 +18,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringJUnitConfig(classes = {
-        WebConfiguration.class,
-        PostControllerIntegrationTest.TestConfig.class
-})
-@WebAppConfiguration
-@TestPropertySource(locations = "classpath:test-application.properties")
+@SpringBootTest
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
 @ActiveProfiles("test")
 class PostControllerIntegrationTest {
 
     @Autowired
-    private WebApplicationContext wac;
+    private MockMvc mockMvc;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private MockMvc mockMvc;
-
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).alwaysDo(print()).build();
-
         jdbcTemplate.execute("DELETE FROM posts"); // cascades to comments
         // Reset identity sequence so DB generated IDs don't overlap with the explicit IDs below
         jdbcTemplate.execute("ALTER TABLE posts ALTER COLUMN id RESTART WITH 50");
@@ -514,16 +496,5 @@ class PostControllerIntegrationTest {
     void deleteComment_postNotFound_returns404() throws Exception {
         mockMvc.perform(delete("/api/posts/{id}/comments/{cid}", 999L, 1L))
                 .andExpect(status().isNotFound());
-    }
-
-    @Configuration
-    static class TestConfig implements WebMvcConfigurer {
-        @Override
-        public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-            converters.stream()
-                    .filter(c -> c instanceof MappingJackson2HttpMessageConverter)
-                    .map(c -> (MappingJackson2HttpMessageConverter) c)
-                    .forEach(c -> c.setPrettyPrint(true));
-        }
     }
 }

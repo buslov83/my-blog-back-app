@@ -1,62 +1,43 @@
 # My-Blog-Back-App
 
-Spring MVC blog web application backend (Java 21, WAR packaged) serving a REST API consumed by an Nginx-hosted frontend. Uses H2 in-memory database, plain Spring JDBC, deployed on Tomcat 10.1.x.
+Spring Boot blog web application backend (Java 21, embedded Tomcat) serving a REST API consumed by an Nginx-hosted frontend. Uses H2 in-memory database and plain Spring JDBC.
 
 ## Technology Stack
 
-| Component         | Technology              | Version   |
-|-------------------|-------------------------|-----------|
-| Language          | Java                    | 21        |
-| Framework         | Spring Web MVC          | 6.2.16    |
-| Database          | H2 (in-memory)          | 2.2.224   |
-| Data access       | Spring JDBC             | 3.5.9     |
-| JSON              | Jackson                 | 2.19.4    |
-| Servlet API       | Jakarta Servlet         | 6.0.0     |
-| Servlet container | Apache Tomcat           | 10.1.x    |
-| Build tool        | Apache Maven            | 3.8.7     |
-| Testing           | JUnit 5, Mockito, Hamcrest | —      |
+| Component         | Technology              | Version                  |
+|-------------------|-------------------------|--------------------------|
+| Language          | Java                    | 21                       |
+| Framework         | Spring Boot             | 3.5.13                   |
+| Database          | H2 (in-memory)          | managed by Spring Boot   |
+| Data access       | Spring JDBC             | managed by Spring Boot   |
+| JSON              | Jackson                 | managed by Spring Boot   |
+| Servlet container | Embedded Tomcat         | managed by Spring Boot   |
+| Build tool        | Apache Gradle           | 8.14.4                   |
+| Testing           | JUnit 5, Mockito, Hamcrest | managed by Spring Boot |
 
 ## Build & Test
 
 ```bash
-./mvnw clean package               # compile + test + produce WAR
-./mvnw test                        # run tests only
-./mvnw clean package -DskipTests   # skip tests
+./gradlew build          # compile + test + produce JAR
+./gradlew test           # run tests only
+./gradlew build -x test  # skip tests
 ```
 
-Output: `target/my-blog-back-app.war`
+Output: `build/libs/my-blog-back-app.jar`
 
-## Deploy to Tomcat 10.1.x
-
-The Nginx frontend is configured to send API requests to `http://localhost:8080/`, so the app must be deployed on Tomcat at the root context path (`/`). To achieve this, deploy the WAR as `ROOT.war`:
+## Run
 
 ```bash
-# Stop Tomcat if running
-$CATALINA_HOME/bin/shutdown.sh
+# Run with Gradle (development)
+./gradlew bootRun
 
-# Remove existing ROOT app (if any)
-rm -r $CATALINA_HOME/webapps/ROOT
-rm $CATALINA_HOME/webapps/ROOT.war
-
-# Copy the built WAR
-cp target/my-blog-back-app.war $CATALINA_HOME/webapps/ROOT.war
+# Or run the JAR directly
+java -jar build/libs/my-blog-back-app.jar
 ```
 
-## Start, Stop & Restart
+The app starts on `http://localhost:8080/`.
 
-```bash
-# Start
-$CATALINA_HOME/bin/startup.sh
-# App is available at http://localhost:8080/
-
-# Stop
-$CATALINA_HOME/bin/shutdown.sh
-
-# Restart (stop, then start)
-$CATALINA_HOME/bin/shutdown.sh && $CATALINA_HOME/bin/startup.sh
-```
-
-> **Note:** The H2 database is in-memory — all data is lost when Tomcat stops.
+> **Note:** The H2 database is in-memory — all data is lost when the application stops.
 
 REST verification examples:
 
@@ -95,7 +76,7 @@ The H2 TCP server starts on port 9092 when the app runs outside the `test` profi
 Example connection using a built-in H2 shell tool:
 
 ```bash
-java -cp ~/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar org.h2.tools.Shell \
+java -cp ~/.m2/repository/com/h2database/h2/2.3.232/h2-2.3.232.jar org.h2.tools.Shell \
   -url "jdbc:h2:tcp://localhost:9092/mem:blogdb" \
   -user sa \
   -password ""
